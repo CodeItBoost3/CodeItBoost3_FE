@@ -3,7 +3,7 @@
 
 export default function Mypage () {
     return (
-     <div className="w-full h-full py-3 overflow-auto">
+     <div className="w-full h-full pt-3 pb-7 overflow-auto">
       <div className="flex items-center mb-1">
         <span className="text-darkViolet text-2xl font-semibold">
            홍길동

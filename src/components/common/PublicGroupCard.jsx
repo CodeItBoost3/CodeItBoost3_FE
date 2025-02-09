@@ -5,7 +5,7 @@ import logo from "@/assets/image/logo-image.svg";
 
 export default function PublicGroupCard({ image, title, description, picturecount, emotioncount, badgecount }) {
     return (
-      <div className="w-[20vw] min-h-[45vh] h-auto bg-white rounded-[7px] border border-lightViolet flex flex-col overflow-hidden">
+      <div className=" hover:shadow-card w-[20vw] min-h-[45vh] h-auto bg-white rounded-[7px] border border-lightViolet flex flex-col overflow-hidden">
         <div className="relative w-full p-5 h-[30vh]">
           <img
             className=" rounded-md w-full h-full object-cover"

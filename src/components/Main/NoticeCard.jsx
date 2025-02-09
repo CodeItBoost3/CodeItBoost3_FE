@@ -11,7 +11,7 @@ export default function NoticeCard() {
           조각집 사용법 보러가기
         </div>
       </div>
-      <button className="w-[106px] h-[40px] bg-darkViolet rounded-full flex items-center justify-center">
+      <button className="w-[106px] h-[40px] bg-darkViolet hover:bg-darkViolet-hover active:bg-darkViolet-active rounded-full flex items-center justify-center">
         <span className="text-white text-base font-normal">자세히</span>
       </button>
     </div>

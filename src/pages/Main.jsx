@@ -1,8 +1,8 @@
 import PublicGroupCard from "@/components/common/PublicGroupCard";
-import NoticeCard from "@/components/Main/NoticeCard";
+import NoticeCard from "@/components/main/NoticeCard";
 import image from "@/assets/icon/main/default-image.png";
-import MemoryCard from "@/components/Main/MemoryCard";
-import MemoryActions from "@/components/Main/MemoryAction";
+import MemoryCard from "@/components/main/MemoryCard";
+import MemoryActions from "@/components/main/MemoryAction";
 
 const groupData = [
   { id: 1, title: "그룹 1", description: "설명 1", image: image, picturecount: "5", emotioncount: "3", badgecount: 5 },
@@ -18,7 +18,7 @@ const memoryData = [
 
 export default function Main() {
   return (
-    <div className="w-full h-full py-3 overflow-auto">
+    <div className="w-full h-full pt-3 pb-7 overflow-auto">
       <div className="flex items-center mb-1">
         <span className="text-darkViolet text-2xl font-semibold">
           홍길동
@@ -33,7 +33,7 @@ export default function Main() {
           <span className="text-black text-xl font-semibold">
             새로운 <span className="text-darkViolet">조각집</span>에 참여해 보세요!
           </span>
-          <span className="text-normalGray-active text-lg">공개 그룹 목록 보러가기</span>
+          <span className="cursor-pointer text-normalGray hover:text-normalGray-hover active:text-normalGray-active text-lg">공개 그룹 목록 보러가기</span>
         </div>
         <div className=" w-full py-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -59,7 +59,7 @@ export default function Main() {
           <span className="text-black text-base font-semibold">최근에 내가 작성한 </span>
           <span className="text-darkViolet text-base font-semibold">추억 글</span>
         </div>
-        <div className="text-right text-normalGray-active text-sm font-semibold">
+        <div className="cursor-pointer text-right text-normalGray hover:text-normalGray-hover active:text-normalGray-active text-sm font-semibold">
           전체 글 보러가기
         </div>
       </div>
