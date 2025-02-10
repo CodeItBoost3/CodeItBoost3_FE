@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link href="/src/index.css" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>조각집</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // 🟣 보라색 계열
+              lightViolet: "#F4DFFB",
+              "lightViolet-hover": "#EBC9F5",
+              "lightViolet-active": "#E1B3ED",
+              normalViolet: "#DC9FF0",
+              "normalViolet-hover": "#CE85E8",
+              "normalViolet-active": "#B76CD6",
+              darkViolet: "#C75EE9",
+              "darkViolet-hover": "#B246D8",
+              "darkViolet-active": "#9D33C6",
+
+              // ⚫ 화이트 ~ 회색 계열
+              darkWhite: "#F2F2F7",
+              background: "#FAFAFA",
+              lightGray: "#F5F5F7",
+              "lightGray-hover": "#f9f9f9",
+              "lightBackground-active": "#f3f3f3",
+              normalGray: "#d9d9d9",
+              "normalGray-hover": "#c3c3c3",
+              "normalGray-active": "#aeaeae",
+              darkGray: "#a3a3a3",
+              "darkGray-hover": "#828282",
+              "darkGray-active": "#6D6D6D",
+              darkerGray: "#4c4c4c",
+              black: "#2B2B2B",
+            },
+            boxShadow: {
+              card: "2px 4px 12px 0px rgba(0, 0, 0, 0.08)",
+              modal: "2px 2px 16px 0px rgba(0, 0, 0, 0.25)",
+            },
+          },
+        },
+        plugins: [
+          function ({ addUtilities }) {
+            addUtilities({
+              ".scrollbar-hide": {
+                "-ms-overflow-style": "none",
+                "scrollbar-width": "none",
+              },
+              ".scrollbar-hide::-webkit-scrollbar": {
+                display: "none",
+              },
+            });
+          },
+        ],
+      };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="modal"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
