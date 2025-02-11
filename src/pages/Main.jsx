@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import PublicGroupCard from "@/components/common/PublicGroupCard";
 import NoticeCard from "@/components/main/NoticeCard";
 import image from "@/assets/icon/main/default-image.png";
@@ -5,10 +7,10 @@ import MemoryCard from "@/components/main/MemoryCard";
 import MemoryActions from "@/components/main/MemoryAction";
 
 const groupData = [
-  { id: 1, title: "그룹 1", description: "설명 1", image: image, picturecount: "5", emotioncount: "3", badgecount: 5 },
-  { id: 2, title: "그룹 2", description: "설명 2", image: image, picturecount: "5", emotioncount: "3", badgecount: "5" },
-  { id: 3, title: "그룹 3", description: "설명 3", image: image, picturecount: "5", emotioncount: "3", badgecount: "5" },
-  { id: 4, title: "그룹 4", description: "설명 4", image: image, picturecount: "5", emotioncount: "3", badgecount: "5" },
+  { id: 1, title: "그룹 1", description: "설명 1", image: image, picturecount: "5", emotioncount: "3", badgecount: "5", days: "D+251" },
+  { id: 2, title: "그룹 2", description: "설명 2", image: image, picturecount: "5", emotioncount: "3", badgecount: "5", days: "D+251" },
+  { id: 3, title: "그룹 3", description: "설명 3", image: image, picturecount: "5", emotioncount: "3", badgecount: "5", days: "D+251" },
+  { id: 4, title: "그룹 4", description: "설명 4", image: image, picturecount: "5", emotioncount: "3", badgecount: "5", days: "D+251" },
 ];
 
 const memoryData = [
@@ -17,6 +19,7 @@ const memoryData = [
 ];
 
 export default function Main() {
+  const navigate = useNavigate();
   return (
     <div className="w-full h-full pt-3 pb-7 overflow-auto">
       <div className="flex items-center mb-1">
@@ -33,7 +36,7 @@ export default function Main() {
           <span className="text-black text-xl font-semibold">
             새로운 <span className="text-darkViolet">조각집</span>에 참여해 보세요!
           </span>
-          <span className="cursor-pointer text-normalGray hover:text-normalGray-hover active:text-normalGray-active text-lg">공개 그룹 목록 보러가기</span>
+          <span onClick={() => navigate('/group')} className="cursor-pointer text-normalGray hover:text-normalGray-hover active:text-normalGray-active text-lg">공개 그룹 목록 보러가기</span>
         </div>
         <div className=" w-full py-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -46,6 +49,7 @@ export default function Main() {
                 picturecount={group.picturecount}
                 emotioncount={group.emotioncount}
                 badgecount={group.badgecount}
+                days={group.days} 
               />
             ))}
           </div>
