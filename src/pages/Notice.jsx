@@ -1,7 +1,8 @@
 import {useState} from "react";
+import {useNavigate} from "react-router-dom";
 
-import SearchBar from "@/components/common/SearchBar.jsx";
-import SquareButton from "@/components/common/SearchButton";
+import Title from "@/components/notice/Title.jsx";
+import SearchBars from "@/components/notice/SearchBars.jsx";
 import ListHeader from "@/components/notice/ListHeader.jsx";
 import ListItem from "@/components/notice/ListItem.jsx";
 import Pagination from "@/components/common/Pagination.jsx";
@@ -75,13 +76,14 @@ export default function Notice() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 10;
+  const navigate = useNavigate();
 
   const handleSearch = () => {
     console.log(search);
   }
 
   const handleListItem = (id) => {
-    console.log(id);
+    navigate(`/notice/${id}`);
   }
 
   const handlePageChange = (page) => {
@@ -90,25 +92,15 @@ export default function Notice() {
 
   return (
       <div className="w-[95%] h-full pt-3 pb-7 overflow-auto">
-        <div className="flex items-center mb-7">
-          <span className="text-darkViolet text-2xl font-semibold">조각집</span>
-          <span className="text-black text-2xl font-semibold">&nbsp;공지사항</span>
-        </div>
-        <div className="flex items-center gap-8 mb-7">
-          <SearchBar
-              placeholder="공지사항 제목 검색"
-              width="w-full"
-              height="h-12"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              onEnter={handleSearch}
-          />
-          <SquareButton
-              name="검색하기"
-              onClick={handleSearch}
-              className="h-full whitespace-nowrap font-medium"
-          />
-        </div>
+        <Title
+            title={"조각집"}
+            subtitle={"공지사항"}
+        />
+        <SearchBars
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            handleSearch={handleSearch}
+        />
         <table className="w-full mb-7">
           <ListHeader/>
           <tbody>
