@@ -3,6 +3,7 @@ import PageLayout from "@/layouts/PageLayout";
 import Main from "@/pages/Main";
 import Login from "@/pages/Login";
 import Group from "@/pages/Group";
+import GroupDetail from "@/pages/GroupDetail"; 
 import Notice from "@/pages/Notice";
 import Scrap from "@/pages/Scrap";
 import Mypage from "@/pages/Mypage";
@@ -15,6 +16,7 @@ const appRoutes = createBrowserRouter([
     children: [
       { index: true, element: <Main /> }, 
       { path: "group", element: <Group /> },
+      { path: "group/:groupId", element: <GroupDetail /> },
       { path: "notice", element: <Notice /> },
       { path: "scrap", element: <Scrap /> },
       { path: "mypage", element: <Mypage /> },

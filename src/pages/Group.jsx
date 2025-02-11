@@ -8,7 +8,7 @@ import PrivateGroupCard from '@/components/common/PrivateGroupCard';
 import PublicGroupCard from '@/components/common/PublicGroupCard';
 import Pagination from "@/components/common/Pagination";
 import SearchBar from "@/components/common/SearchBar";
-import SquareButton from "@/components/common/SearchButton";
+import SearchButton from "@/components/common/SearchButton";
 import Select from '@/components/common/Select';
 
 const GROUP_PARAMS = 'group';
@@ -55,9 +55,11 @@ export default function Group() {
   const handleSearch = () => {
     console.log("검색어:", searchTerm);
   };
+
   const handleSelect = (selected) => {
     console.log("선택된 옵션:", selected);
   };
+  
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -84,7 +86,7 @@ export default function Group() {
           onChange={e => setSearchTerm(e.target.value)}
           onEnter={handleSearch} 
         />
-        <SquareButton
+        <SearchButton
           name="검색하기"
           onClick={handleSearch} 
           className="h-full whitespace-nowrap font-medium"
@@ -96,6 +98,7 @@ export default function Group() {
           {tabName === 'Public'
             ? publicGroupData.map((group) => (
                 <PublicGroupCard
+                  id={group.id}
                   key={group.id}
                   title={group.title}
                   description={group.description}
@@ -108,6 +111,7 @@ export default function Group() {
               ))
             : privateGroupData.map((group) => (
                 <PrivateGroupCard
+                  id={group.id}
                   key={group.id} 
                   title={group.title}
                   days={group.days} 
