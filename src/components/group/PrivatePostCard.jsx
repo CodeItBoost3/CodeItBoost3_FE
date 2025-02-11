@@ -3,11 +3,15 @@ import { useNavigate } from "react-router-dom";
 import commentIcon from "@/assets/icon/group/comment.svg";
 import empathyIcon from "@/assets/image/logo-image.svg";
 
-export default function PrivateGroupCard({ id, title, author, visibility, date, likes, comments }) {
+export default function PrivateGroupCard({ id, groupId, title, author, visibility, date, likes, comments }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/post/${id}`);
+    if (!id || !groupId) {
+      console.error("Invalid ID or groupId:", { id, groupId });
+      return;
+    }
+    navigate(`/group/${groupId}/post/${id}`); 
   };
 
   return (

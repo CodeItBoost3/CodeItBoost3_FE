@@ -88,7 +88,7 @@ export default function GroupDetail() {
         </button>
       </div>
 
-      <div className="my-[70px] border-t border-normalGray"></div>
+      <div className="my-[70px] border-t border-gray-200"></div>
 
       <div>
         <div className='flex gap-3 justify-start items-center mb-3'>
@@ -121,8 +121,20 @@ export default function GroupDetail() {
         
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {tabName === "Public"
-            ? publicMemories.map((memory, index) => <PublicPostCard key={index} {...memory} />)
-            : privateMemories.map((memory, index) => <PrivatePostCard key={index} {...memory} />)}
+            ? publicMemories.map((memory, index) => 
+                <PublicPostCard
+                    key={index}
+                    id={index + 1}
+                    groupId={1} 
+                    {...memory}
+                />)
+            : privateMemories.map((memory, index) => 
+                <PrivatePostCard 
+                    key={index}
+                    id={index + 1}
+                    groupId={1} 
+                    {...memory}
+                />)}
         </div>
 
  

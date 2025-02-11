@@ -1,10 +1,14 @@
+import { useNavigate } from 'react-router-dom';
+
 import image from '@/assets/icon/main/default-image.png';
 import empathyIcon from "@/assets/image/logo-image.svg";
 import commentIcon from "@/assets/icon/group/comment.svg";
 
-export default function MemoryPostCard({ 
+export default function PublicPostCard({ 
+  id,
   title,
   author, 
+  groupId,
   visibility, 
   location, 
   date, 
@@ -14,9 +18,18 @@ export default function MemoryPostCard({
 }) {
   const truncateText = (text, maxLength) => 
     text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (!id || !groupId) {
+      console.error("Invalid ID or groupId:", { id, groupId });
+      return;
+    }
+    navigate(`/group/${groupId}/post/${id}`); 
+  };
 
   return (
-    <div className="cursor-default hover:shadow-card w-[20vw] border border-lightGray bg-white rounded-lg overflow-hidden">
+    <div onClick={handleClick} className="cursor-default hover:shadow-card w-[20vw] border border-lightGray bg-white rounded-lg overflow-hidden">
 
       <img src={image} className="w-full h-48 object-cover" alt="추억 이미지" />
 
