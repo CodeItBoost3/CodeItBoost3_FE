@@ -1,10 +1,12 @@
 import SideBar from "@/layouts/SideBar";
 import Header from "@/layouts/Header";
 import { Outlet } from 'react-router-dom';
+import ScrollToTop from "@/components/common/ScrollToTop";
 
 export default function PageLayout({ children }) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background"> 
+      <ScrollToTop />
       <div className="w-full ">
         <Header />
       </div>
