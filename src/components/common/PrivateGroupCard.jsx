@@ -1,10 +1,18 @@
+import { useNavigate } from "react-router-dom";
+
 import lock from "@/assets/icon/main/lock.svg";
 import picture from "@/assets/icon/main/picture.svg";
 import logo from "@/assets/image/logo-image.svg";
 
-export default function PrivateGroupCard({ title, days, picturecount, emotioncount }) {
+export default function PrivateGroupCard({ id, title, days, picturecount, emotioncount }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/group/${id}`);
+  };
+  
   return (
-    <div className="hover:shadow-card w-[20vw] min-h-[20vh] px-3 pb-3 pt-5 relative bg-white rounded-[10px] border border-lightViolet overflow-hidden">
+    <div onClick={handleClick} className="cursor-default hover:shadow-card w-[20vw] min-h-[20vh] px-1 pb-3 pt-5 relative bg-white rounded-[10px] border border-lightViolet overflow-hidden">
         <div className="px-4 pb-4 flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="flex px-3 py-1 text-sm text-darkGray-active bg-lightViolet-hover rounded-lg">

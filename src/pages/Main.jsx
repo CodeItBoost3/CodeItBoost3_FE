@@ -43,6 +43,7 @@ export default function Main() {
             {groupData.map((group) => (
               <PublicGroupCard
                 key={group.id}
+                id={group.id}
                 title={group.title}
                 description={group.description}
                 image={group.image}
