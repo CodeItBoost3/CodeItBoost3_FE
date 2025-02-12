@@ -1,10 +1,11 @@
 import { useState } from "react";
+import useSignupForm from "@/hooks/useSignupForm";
 
 export default function SignupForm({ onClose, onNavigateLogin }) {
     const [isSignupComplete, setIsSignupComplete] = useState(false);
-
+    const { formData, errors, handleChange } = useSignupForm(); 
     return (
-        <div className="w-[28vw] min-w-[350px] min-h-[550px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[40px] 
+        <div className="w-[28vw] min-w-[370px] min-h-[580px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[40px] 
             rounded-xl border border-white bg-white/70 px-11 py-6 shadow-lg transition-all duration-500 translate-x-0 opacity-100"
         >
             <button
@@ -14,7 +15,98 @@ export default function SignupForm({ onClose, onNavigateLogin }) {
                 ←
             </button>
 
-            {isSignupComplete ? (
+            {!isSignupComplete ? (
+                <>
+                    <div className="ml-1 flex flex-col items-start justify-start gap-[22px] self-stretch">
+                        <h1 className="self-stretch text-start">
+                            <span className="text-2xl mr-2 font-semibold leading-tight text-darkViolet">
+                                조각집 
+                            </span>
+                            <span className="text-2xl font-semibold leading-tight text-black">
+                                회원가입
+                            </span>
+                        </h1>
+                    </div>
+                    <div className="flex flex-col w-full gap-4">
+                    <label className="text-sm font-medium text-black">아이디</label>
+                    <div className="relative flex items-center space-x-3 w-full">
+                        <div className={`relative flex-1 border rounded-md px-4 py-2 transition 
+                            ${errors.id ? "bg-bg border-red-500 focus-within:border-red-500" : "border-gray-300 focus-within:border-normalViolet bg-bg focus-within:ring-2 focus-within:ring-normalViolet"}`}
+                        >
+                            <input
+                                type="text"
+                                name="id"
+                                value={formData.id}
+                                onChange={handleChange}
+                                placeholder="아이디를 입력해 주세요"
+                                className="w-full bg-transparent outline-none text-darkerGray focus:ring-0 focus:outline-none"
+                            />
+                            {errors.id && (
+                                <p className="absolute bottom-[-18px] left-0 text-red-500 text-xs">
+                                    {errors.id}
+                                </p>
+                            )}
+                        </div>
+                        <button 
+                            type="button" 
+                            className="px-4 py-2 h-full text-sm font-medium text-white bg-normalViolet hover:bg-normalViolet-hover rounded-md transition"
+                        >
+                            중복확인
+                        </button>
+                    </div>
+
+                    <label className="text-sm font-medium text-black">비밀번호</label>
+                    <div className="relative">
+                        <div className={`relative border rounded-md px-4 py-2 transition w-full
+                            ${errors.password ? "bg-bg border-red-500 focus-within:border-red-500" : "border-gray-300 focus-within:border-normalViolet bg-bg focus-within:ring-2 focus-within:ring-normalViolet"}`}
+                        >
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="비밀번호를 입력해 주세요"
+                                className="w-full bg-transparent outline-none text-darkerGray focus:ring-0 focus:outline-none"
+                            />
+                            {errors.password && (
+                                <p className="absolute bottom-[-18px] left-0 text-red-500 text-xs">
+                                    {errors.password}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <label className="text-sm font-medium text-black">닉네임</label>
+                    <div className="relative">
+                        <div className={`relative border rounded-md px-4 py-2 transition w-full
+                            ${errors.nickname ? "bg-bg border-red-500 focus-within:border-red-500" : "border-gray-300 focus-within:border-normalViolet bg-bg focus-within:ring-2 focus-within:ring-normalViolet"}`}
+                        >
+                            <input
+                                type="text"
+                                name="nickname"
+                                value={formData.nickname}
+                                onChange={handleChange}
+                                placeholder="닉네임을 입력해 주세요"
+                                className="w-full bg-transparent outline-none text-darkerGray focus:ring-0 focus:outline-none"
+                            />
+                            {errors.nickname && (
+                                <p className="absolute bottom-[-18px] left-0 text-red-500 text-xs">
+                                    {errors.nickname}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setIsSignupComplete(true)}
+                        className="w-full mt-1 rounded-md bg-lightViolet hover:bg-lightViolet-hover active:bg-lightViolet-active py-2.5 text-sm font-medium tracking-tight text-black"
+                    >
+                        회원가입
+                    </button>
+                </>
+            ) : (
                 <div className="my-5 flex flex-col gap-6 items-start text-start w-full">
                     <h2 className="text-xl text-darkerGray font-semibold">닉네임님 환영합니다!</h2>
                     <p className="text-lg text-black font-semibold mt-2">
@@ -31,65 +123,6 @@ export default function SignupForm({ onClose, onNavigateLogin }) {
                         로그인
                     </button>
                 </div>
-            ) : (
-                <>
-                    <div className="ml-1 flex flex-col items-start justify-start gap-[22px] self-stretch">
-                        <h1 className="self-stretch text-start">
-                            <span className="text-2xl mr-2 font-semibold leading-tight text-darkViolet">
-                                조각집 
-                            </span>
-                            <span className="text-2xl font-semibold leading-tight text-black">
-                                회원가입
-                            </span>
-                        </h1>
-                    </div>
-                    <div className="flex flex-col w-full gap-4">
-                        <div className="flex items-center space-x-3 w-full">
-                            <div className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus-within:border-normalViolet 
-                                bg-bg focus-within:ring-2 focus-within:ring-normalViolet transition">
-                                <input
-                                    type="text"
-                                    placeholder="아이디를 입력해 주세요"
-                                    className="w-full bg-transparent outline-none text-darkerGray focus:ring-0 focus:outline-none"
-                                />
-                            </div>
-                            <button 
-                                type="button" 
-                                className="px-4 py-2 h-full text-sm font-medium text-white bg-normalViolet hover:bg-normalViolet-hover 
-                                rounded-md transition"
-                            >
-                                중복확인
-                            </button>
-                        </div>
-
-                        <label className="text-sm font-medium text-black">비밀번호</label>
-                        <div className="flex items-center space-x-3 border border-gray-300 rounded-md px-4 py-2 
-                            focus-within:border-normalViolet bg-bg focus-within:ring-2 focus-within:ring-normalViolet transition">
-                            <input
-                                type="password"
-                                placeholder="비밀번호를 입력해 주세요"
-                                className="bg-transparent flex-1 outline-none text-darkerGray focus:ring-0 focus:outline-none"
-                            />
-                        </div>
-
-                        <label className="text-sm font-medium text-black">닉네임</label>
-                        <div className="flex items-center space-x-3 border border-gray-300 rounded-md px-4 py-2 
-                            focus-within:border-normalViolet bg-bg focus-within:ring-2 focus-within:ring-normalViolet transition">
-                            <input
-                                type="text"
-                                placeholder="닉네임을 입력해 주세요"
-                                className="bg-transparent flex-1 outline-none text-darkerGray focus:ring-0 focus:outline-none"
-                            />
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => setIsSignupComplete(true)}
-                        className="w-full mt-1 rounded-md bg-lightViolet hover:bg-lightViolet-hover active:bg-lightViolet-active py-2.5 text-sm font-medium tracking-tight text-black"
-                    >
-                        회원가입
-                    </button>
-                </>
             )}
         </div>
     );

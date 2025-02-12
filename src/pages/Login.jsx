@@ -13,7 +13,7 @@ export default function Login() {
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-lightViolet-active to-bg-violet relative overflow-hidden">
       <div className={`flex items-center justify-center gap-10 transition-all duration-500 w-full max-w-[900px]`}>
       <div
-          className={`w-[28vw] min-w-[350px] min-h-[550px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[60px] 
+          className={`w-[28vw] min-w-[370px] min-h-[580px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[60px] 
             rounded-xl border border-white bg-white/70 px-11 py-20 shadow-lg transition-all duration-500 ${
               showLoginForm || showSignupForm ? "-translate-x-10" : "translate-x-0 opacity-100"
             }`}

@@ -1,7 +1,7 @@
 export default function LoginForm({ onClose, onNavigateHome }) {
     return (
         <div
-            className="w-[28vw] min-w-[350px] min-h-[550px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[40px] rounded-xl border border-white bg-white/70 px-11 py-10 shadow-lg transition-all duration-500 translate-x-0 opacity-100"
+            className="w-[28vw] min-w-[370px] min-h-[580px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[40px] rounded-xl border border-white bg-white/70 px-11 py-10 shadow-lg transition-all duration-500 translate-x-0 opacity-100"
         >
         <button
             onClick={onClose}
