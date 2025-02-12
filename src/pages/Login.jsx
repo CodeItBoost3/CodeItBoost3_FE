@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "@/assets/image/logo-image.svg";
 import LoginForm from "@/components/login/LoginForm";
 import SignupForm from "@/components/login/SignupForm";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
 
@@ -67,8 +69,16 @@ export default function Login() {
           </div>
         </div>
 
-        {showLoginForm && <LoginForm onClose={() => setShowLoginForm(false)} />}
-        {showSignupForm && <SignupForm onClose={() => setShowSignupForm(false)} />}
+        {showLoginForm && <LoginForm onClose={() => setShowLoginForm(false)} onNavigateHome={() => navigate('/')} />}
+        {showSignupForm && (
+          <SignupForm
+            onClose={() => setShowSignupForm(false)}
+            onNavigateLogin={() => {
+              setShowSignupForm(false);
+              setShowLoginForm(true);
+            }}
+          />
+        )}
       </div>
     </div>
   );
