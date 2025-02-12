@@ -6,6 +6,7 @@ import Group from "@/pages/Group";
 import GroupDetail from "@/pages/GroupDetail"; 
 import MemoryPost from "@/pages/MemoryPost";
 import Notice from "@/pages/Notice";
+import NoticeDetail from "@/pages/NoticeDetail";
 import Scrap from "@/pages/Scrap";
 import Mypage from "@/pages/Mypage";
 import NotFound from "@/pages/NotFound";
@@ -20,6 +21,7 @@ const appRoutes = createBrowserRouter([
       { path: "group/:groupId", element: <GroupDetail /> },
       { path: "group/:groupId/post/:postId", element: <MemoryPost /> },
       { path: "notice", element: <Notice /> },
+      { path: "notice/:noticeId", element: <NoticeDetail /> },
       { path: "scrap", element: <Scrap /> },
       { path: "mypage", element: <Mypage /> },
     ],
