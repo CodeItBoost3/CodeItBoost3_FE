@@ -70,9 +70,10 @@ export default function Main() {
       </div>
       {/* 섹션 1 카드 */}
       <div className="h-auto w-full bg-white rounded-[17.33px] p-4 shadow-md flex flex-col gap-5">
-        {memoryData.map((item) => (
+        {memoryData.map((item, idx) => (
           <MemoryCard
             key={item.id}
+            index={idx}
             title={item.title}
             date={item.date}
             memory={item.memory}
