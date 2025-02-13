@@ -1,13 +1,19 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import ArrowDownIcon from '@/assets/icon/main/arrow-down.svg';
 import ArrowUpIcon from '@/assets/icon/main/arrow-up.svg';
 
-function MemoryCard({ title, date, memory, sympathy, comments }) {
+function MemoryCard({ title, date, memory, sympathy, comments, index }) {
    const [isOpen, setIsOpen] = useState(false);
 
    const handleMemoryCard = () => {
      setIsOpen(!isOpen);
    }
+
+  useEffect(() => {
+    if(index === 0){
+      setIsOpen(true);
+    }
+  },[])
 
     return (
       <div className="flex flex-col gap-4">
