@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/useToast";
 import useSignupForm from "@/hooks/useSignupForm";
-import axiosInstance from "@/services/axiosInstance";
+import authService from "@/services/user/authService";
 
 export default function SignupForm({ onClose, onNavigateLogin }) {
     const [isSignupComplete, setIsSignupComplete] = useState(false);
@@ -18,45 +18,37 @@ export default function SignupForm({ onClose, onNavigateLogin }) {
         }
     
         try {
-            const response = await axiosInstance.get(`/users/validation?client-id=${formData.id}`);
-            if (response.status === 200) {
-                setIsIdAvailable(true);
-                setIdCheckMessage("사용 가능한 ID입니다.");
-            }
-        } catch (error) {
-            if (error.response && error.response.status === 400) {
-                setIsIdAvailable(false);
-                setIdCheckMessage("이미 존재하는 ID입니다.");
-            } else {
-                setIsIdAvailable(false);
-                setIdCheckMessage("아이디 중복 확인 중 오류가 발생했습니다.");
-            }
+            const isAvailable = await authService.checkIdAvailability(formData.id);
+            setIsIdAvailable(isAvailable);
+            setIdCheckMessage(isAvailable ? "사용 가능한 ID입니다." : "이미 존재하는 ID입니다.");
+        } catch  {
+            setIsIdAvailable(false);
+            setIdCheckMessage("아이디 중복 확인 중 오류가 발생했습니다.");
         }
     };
     
-
     const handleSignup = async () => {
         if (!isIdAvailable) {
             addToast("아이디 중복 확인을 완료해 주세요.");
             return;
         }
-
+    
+        console.log("회원가입 요청 formData:", formData);
+    
         try {
-            const response = await axiosInstance.post("/users", {
-                clientId: formData.id,
-                password: formData.password,
-                nickname: formData.nickname,
+            await authService.signup({
+                clientId: formData.id, 
+                password: formData.password, 
+                nickname: formData.nickname
             });
-
-            if (response.status === 201) {
-                setIsSignupComplete(true);
-                addToast("회원가입이 완료되었습니다!");
-            }
+            setIsSignupComplete(true);
+            addToast("회원가입이 완료되었습니다!");
         } catch (error) {
+            console.error("회원가입 오류:", error);
             addToast("회원가입 중 오류가 발생했습니다.");
-            console.log(error);
         }
     };
+    
 
     return (
         <div className="w-[28vw] min-w-[370px] min-h-[580px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[40px] 
