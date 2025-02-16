@@ -6,6 +6,10 @@ body {
   font-family: "Pretendard", sans-serif;
 }
 
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @font-face {
   font-family: "Pretendard";
   src: url("/fonts/Pretendard-Regular.woff") format("woff");

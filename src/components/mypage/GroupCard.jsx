@@ -14,12 +14,11 @@ const groupData = [
   {id: 5, name: "그룹 7"},
   {id: 5, name: "그룹 8"},
   {id: 5, name: "그룹 9"},
-
 ]
 
 export default function GroupCard() {
   return (
-      <div className="w-[29vw] min-h-[30vh] bg-white rounded-lg border border-normalGray relative p-7">
+      <div className="w-[22vw] min-h-[30vh] bg-white rounded-lg border border-normalGray relative p-7">
         <p className="text-base font-semibold">내가 속한 조각 그룹</p>
         <div className="pt-2 max-h-[25vh] overflow-y-auto [&::-webkit-scrollbar]:hidden">
           {groupData.map((item, index) => (
