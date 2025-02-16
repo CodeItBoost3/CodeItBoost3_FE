@@ -1,3 +1,4 @@
+import {useState} from "react";
 import {IoClose} from "react-icons/io5";
 
 import Profile from "@/components/mypage/Profile.jsx";
@@ -7,6 +8,24 @@ import UploadIcon from "@/assets/icon/mypage/upload.svg";
 import DeleteIcon from "@/assets/icon/mypage/delete.svg";
 
 export default function EditProfile({onClose,onVerfiyChange, nickname, id}) {
+  const [profile, setProfile] = useState(Image);
+
+  const handleImageUpload = (event) => {
+    console.log(event);
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        console.log(reader.result);
+        setProfile(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setProfile(Image);
+  }
   return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
         <div className="w-[470px] bg-white rounded-2xl p-8 shadow-lg">
@@ -18,10 +37,13 @@ export default function EditProfile({onClose,onVerfiyChange, nickname, id}) {
           </div>
 
           <div className="flex items-end gap-2.5 mt-5">
-            <Profile img={Image} width={"w-[65px]"} height={"h-[65px]"}/>
+            <Profile img={profile} width={"w-[65px]"} height={"h-[65px]"}/>
             <div className="flex gap-2.5 h-7 pt-1 pb-1 pl-3 pr-3 rounded-full border border-normalGray bg-white">
-              <img src={UploadIcon} alt="Upload Icon" className="w-[17px] h-[17px]"/>
-              <img src={DeleteIcon} alt="Delete Icon" className="w-[17px] h-[17px]"/>
+              <label className="block cursor-pointer">
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload}/>
+                <img src={UploadIcon} alt="Upload Icon" className="w-[17px] h-[17px]"/>
+              </label>
+              <img src={DeleteIcon} alt="Delete Icon" className="w-[17px] h-[17px]" onClick={handleRemoveImage}/>
             </div>
           </div>
 
