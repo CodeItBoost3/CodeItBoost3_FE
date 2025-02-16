@@ -1,10 +1,12 @@
-import {useRef} from "react";
-// import PublicGroupCard from "@/components/common/PublicGroupCard"; {/* 공개 그룹 카드 컴포넌트 */
+import {useRef, useState} from "react";
+
 import PublicPostCard from "@/components/group/PublicPostCard.jsx";
 import ProfileEditCard from "@/components/mypage/ProfileEditCard.jsx";
 import MemoryAction from "@/components/Main/MemoryAction.jsx";
 import GroupCard from "@/components/mypage/GroupCard.jsx";
 import Reply from "@/components/mypage/Reply.jsx";
+import EditProfile from "@/components/modal/EditProfile.jsx";
+import PassWordChange from "@/components/modal/PassWordChange.jsx";
 
 import ArrowLeftIcon from "@/assets/icon/mypage/arrow-left.svg";
 import ArrowRightIcon from "@/assets/icon/mypage/arrow-right.svg";
@@ -32,7 +34,18 @@ const repliyDatas = [
 export default function Mypage() {
   const articlescrollRef = useRef(null);
   const replyScrollRef = useRef(null);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isSecondeModalVisible, setSecondeModalVisible] = useState(false);
   const length = publicMemories.length;
+
+  const handleEdit = () => {
+    setModalVisible(true);
+  }
+
+  const handleVerfiyChange = () => {
+    setModalVisible(false);
+    setSecondeModalVisible(true)
+  }
 
   return (
       <div className="w-full h-full pt-3 pb-7">
@@ -45,7 +58,7 @@ export default function Mypage() {
           </span>
         </div>
         <div className="flex gap-10 max-w-[93%]">
-          <ProfileEditCard/>
+          <ProfileEditCard onClickEdit={handleEdit} />
           <MemoryAction/>
           <GroupCard/>
         </div>
@@ -100,6 +113,14 @@ export default function Mypage() {
                 <img src={ArrowRightIcon} onClick={() => smoothScroll(replyScrollRef, 300)}/>
               </div>}
         </div>
+        {isModalVisible &&
+            <EditProfile
+            id={"gildeong32"}
+            nickname={"홍길동"}
+            onClose={() => setModalVisible(false)}
+            onVerfiyChange={handleVerfiyChange}
+        />}
+        {isSecondeModalVisible && <PassWordChange onClose={() => setSecondeModalVisible(false)} />}
       </div>
   );
 }
