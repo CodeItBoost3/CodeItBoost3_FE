@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axiosInstance from "@/services/axiosInstance";
+import authService from "@/services/user/authService";
 import { useToast } from "@/hooks/useToast";
 
 export default function LoginForm({ onClose, onNavigateHome }) {
@@ -9,16 +9,14 @@ export default function LoginForm({ onClose, onNavigateHome }) {
 
   const handleLogin = async () => {
     try {
-      const response = await axiosInstance.post("/auth/login", {
-        clientId,
-        password,
-      });
-
-      if (response.status === 200) {
-        addToast("로그인에 성공하였습니다.");
-        localStorage.setItem("accessToken", response.data.accessToken);
-        onNavigateHome();
-      }
+      const response = await authService.login(clientId, password);
+  
+      const { accessToken } = response.data;
+  
+      localStorage.setItem("accessToken", `${accessToken}`);
+  
+      addToast("로그인에 성공하였습니다.");
+      onNavigateHome();
     } catch (error) {
       if (error.response) {
         const { status } = error.response;
@@ -34,6 +32,7 @@ export default function LoginForm({ onClose, onNavigateHome }) {
       }
     }
   };
+  
 
   return (
     <div className="w-[28vw] min-w-[370px] min-h-[580px] z-10 flex h-[76vh] flex-col items-center justify-start gap-[40px] 
