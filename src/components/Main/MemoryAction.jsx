@@ -1,8 +1,8 @@
 import LogoImage from "@/assets/image/logo-image.svg";
 
-export default function MemoryActions({ widthClass = "flex-1" }) {
+export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0" }) {
   return (
-    <div className={`${widthClass} mt-[7vh] h-auto px-3 py-6 bg-[#f4dffb]/20 rounded-lg border border-normalGray flex flex-col justify-between`}>
+    <div className={`${widthClass} ${marginTop} h-auto px-3 py-6 bg-[#f4dffb]/20 rounded-lg border border-normalGray flex flex-col justify-between`}>
       <div className="self-stretch flex flex-col gap-2">
         <div className="px-1 pb-2 text-base font-semibold rounded-lg flex items-center">
           <span className="text-darkViolet">조각집</span>

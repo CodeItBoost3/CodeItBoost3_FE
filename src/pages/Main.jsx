@@ -84,7 +84,7 @@ export default function Main() {
       </div>
     </div>
       {/* 섹션 2 */}
-      <MemoryActions widthClass="flex-1" />
+      <MemoryActions widthClass="flex-1" marginTop="mt-[7vh]" />
     </div>
 
     </div>
