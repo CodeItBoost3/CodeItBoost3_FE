@@ -1,21 +1,24 @@
 import { useState } from "react";
 import { FaTrash, FaTimes } from "react-icons/fa";
+import postService from "@/services/post/postService";
 
-export default function CreateMemory({ onClose }) {
+export default function CreateMemory({ groupId, onClose }) {
   const [isPublic, setIsPublic] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [formData, setFormData] = useState({
-    nickname: "",
     title: "",
+    content: "",
     tags: [],
     location: "",
     memoryDate: "",
-    content: "",
   });
 
+  /** 대표 이미지 업로드 */
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -24,15 +27,19 @@ export default function CreateMemory({ onClose }) {
     }
   };
 
+  /** 이미지 삭제 */
   const handleRemoveImage = () => {
+    setImageFile(null);
     setPreviewImage(null);
   };
 
+  /** 입력 필드 변경 */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /** 태그 추가 */
   const handleTagKeyDown = (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -47,11 +54,49 @@ export default function CreateMemory({ onClose }) {
     }
   };
 
+  /** 태그 삭제 */
   const handleTagClick = (tagToRemove) => {
     setFormData((prev) => ({
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
+  };
+
+  /** 게시글 작성 요청 */
+  const handleCreatePost = async () => {
+    if (!formData.title.trim()) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
+    if (!formData.content.trim()) {
+      alert("본문 내용을 입력해주세요.");
+      return;
+    }
+    if (!formData.memoryDate) {
+      alert("추억의 순간 날짜를 선택해주세요.");
+      return;
+    }
+
+    try {
+      const postData = {
+        title: formData.title,
+        content: formData.content,
+        location: formData.location,
+        moment: formData.memoryDate,
+        isPublic: isPublic.toString(),
+        tag: formData.tags,
+        imageFile: imageFile,
+      };
+
+      const response = await postService.createPost(groupId, postData);
+      console.log("게시글 생성 성공:", response);
+
+      alert("게시글이 성공적으로 등록되었습니다.");
+      onClose(); 
+    } catch (error) {
+      console.error("게시글 생성 실패:", error);
+      alert("게시글 작성 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -63,7 +108,7 @@ export default function CreateMemory({ onClose }) {
         </button>        
 
         <h2 className="text-center text-xl font-semibold text-darkViolet mb-4">
-          <span className="text-black">달봉이네 가족</span>에 새로운 추억 기록하기
+          새로운 추억 기록하기
         </h2>
 
         <div className="flex flex-col md:flex-row gap-6 w-full">
@@ -78,8 +123,8 @@ export default function CreateMemory({ onClose }) {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
-                  placeholder="그룹 이름"
+                  className="focus:outline-normalViolet w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
+                  placeholder="게시글 제목"
                 />
               </div>
 
@@ -117,17 +162,17 @@ export default function CreateMemory({ onClose }) {
                   name="content"
                   value={formData.content}
                   onChange={handleChange}
-                  className="w-full h-[98px] px-[10px] border border-mediumGray rounded-[10px] text-[10px] text-normalGray"
+                  className="focus:outline-normalViolet w-full h-[98px] px-[10px] border border-mediumGray rounded-[10px] text-[10px] text-normalGray"
                   placeholder="본문 내용을 입력해 주세요."
                 />
               </div>
-            </div>
+              </div>
           </div>
 
           <div className="w-full md:w-[365px] flex flex-col">
             <div className="flex flex-col space-y-5">
               
-              <div className="flex flex-col">
+              <div className="flex flex-col space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-black text-[13px] font-medium">
                     태그 <span className="text-mediumGray">(최대 10개)</span>
@@ -135,7 +180,7 @@ export default function CreateMemory({ onClose }) {
                 </div>
                 <input
                   type="text"
-                  className="w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
+                  className="focus:outline-normalViolet w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
                   placeholder="Enter를 누르면 태그가 등록됩니다."
                   onKeyDown={handleTagKeyDown}
                 />
@@ -154,29 +199,25 @@ export default function CreateMemory({ onClose }) {
               </div>
 
               <div className="flex flex-col gap-[9.87px]">
-                <label className="text-black text-[13.17px] font-medium">
-                  장소
-                </label>
+                <label className="text-black text-[13.17px] font-medium">장소</label>
                 <input
                   type="text"
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full h-[27.65px] px-[10.53px] py-[6.58px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
+                  className="focus:outline-normalViolet w-full h-[27.65px] px-[10.53px] py-[6.58px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
                   placeholder="장소를 입력해 주세요."
                 />
               </div>
 
               <div className="flex flex-col gap-[9.87px]">
-                <label className="text-black text-[13.17px] font-medium">
-                  추억의 순간
-                </label>
+                <label className="text-black text-[13.17px] font-medium">추억의 순간</label>
                 <input
                   type="date"
                   name="memoryDate"
                   value={formData.memoryDate}
                   onChange={handleChange}
-                  className="w-[136.26px] h-[28.31px] px-[10.53px] py-[9.87px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
+                  className="focus:outline-normalViolet w-[136.26px] h-[28.31px] px-[10.53px] py-[9.87px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
                 />
               </div>
               <div className="flex-col items-center space-y-3">
@@ -191,9 +232,19 @@ export default function CreateMemory({ onClose }) {
                   </div>
                   </div>
               </div>
+
             </div>
           </div>
 
+        </div>
+        <div className="flex justify-center w-full mt-6">
+          <button
+            onClick={handleCreatePost}
+            className="w-[150px] h-[40px] bg-normalViolet text-white font-medium text-sm rounded-lg 
+                       hover:bg-normalViolet-hover active:bg-normalViolet-active transition"
+          >
+            등록하기
+          </button>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import PrivatePostCard from '@/components/group/PrivatePostCard';
 import Pagination from "@/components/common/Pagination";
 import CreateMemory from "@/components/modal/CreateMemory";
 import MoreOptionsModal from "@/components/modal/MoreOptionsModal";
+import EditGroup from "@/components/modal/EditGroup";
 
 import AddIcon from "@/assets/icon/group/add-memory.svg";
 import LogoImage from "@/assets/image/logo-image.svg";
@@ -22,6 +23,7 @@ export default function GroupDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
+  const [showEditGroup, setShowEditGroup] = useState(false);
 
   const totalPages = 10;
   const GROUP_PARAMS = 'group';
@@ -100,8 +102,9 @@ export default function GroupDetail() {
         </button>
       </div>
       {isModalOpen && <CreateMemory onClose={() => setIsModalOpen(false)} />}
-      {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} />}
-
+      {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} onEdit={() => setShowEditGroup(true)} />}
+      {showEditGroup && <EditGroup onClose={() => setShowEditGroup(false)} />}
+        
       <div className="my-[70px] border-t border-gray-200"></div>
 
       <div>
