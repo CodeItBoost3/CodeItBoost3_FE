@@ -101,7 +101,6 @@ export const searchGroups = async (keyword) => {
   if (!keyword.trim()) {
     throw new Error("검색어를 입력해 주세요.");
   }
-
   return axiosInstance
     .get(`/api/groups/search`, { params: { keyword } })
     .then((response) => response.data)

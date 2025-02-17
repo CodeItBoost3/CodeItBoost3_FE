@@ -22,6 +22,8 @@ export default function GroupDetail() {
   const { groupId } = useParams();
   const addToast = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  // eslint-disable-next-line
+  const [groupData, setGroupData] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,10 +68,15 @@ export default function GroupDetail() {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
   }, [searchParams]);
 
-  const handleSearch = () => {
-    console.log("검색어:", searchTerm);
+  const handleSearch = async () => {
+    try {
+      const data = await groupService.searchGroups(searchTerm);
+      setGroupData(data.data || []);
+    } catch {
+      addToast("그룹 검색에 실패했습니다.");
+    }
   };
-
+  
   const handleSelect = (selectedValue) => {
     if (selectedValue !== sortBy) {
       setSortBy(selectedValue);

@@ -2,6 +2,7 @@ import mainLogo from '@/assets/image/logo-image.svg';
 
 export default function LoadingSpinner({ size = 200 }) {
   return (
+    <div className="flex justify-center items-center w-full h-full min-h-screen">
     <div
       className="relative flex items-center justify-center"
       style={{ height: `${size}px`, width: `${size}px` }}
@@ -33,6 +34,7 @@ export default function LoadingSpinner({ size = 200 }) {
         />
       </svg>
       <img src={mainLogo} className="absolute w-[40%]" alt="로고" />
+    </div>
     </div>
   );
 }
