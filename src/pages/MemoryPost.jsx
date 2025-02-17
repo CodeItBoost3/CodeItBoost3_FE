@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { MapPinIcon, CalendarIcon } from "@heroicons/react/24/solid";
-
 import CommentSection from "@/components/group/Comment.jsx";
+import MoreOptionsModal from "@/components/modal/MoreOptionsModal";
+import EditMemory from "@/components/modal/EditMemory";
 
 import empathyIcon from "@/assets/image/logo-image.svg";
 import commentIcon from "@/assets/icon/group/comment.svg";
@@ -10,6 +12,21 @@ import moreIcon from "@/assets/icon/group/more.svg";
 
 export default function MemoryPost() {
   const { postId } = useParams();
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
+  const [showEditMemory, setShowEditMemory] = useState(false);
+  const [comments] = useState("");
+  
+  const handleMoreClick = (event) => {
+    event.preventDefault();
+    setIsMoreOpen(true);
+    setMorePosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleCloseMore = () => {
+    setIsMoreOpen(false);
+  };
+
 
   const post = {
     1: {
@@ -32,13 +49,13 @@ export default function MemoryPost() {
       location: "인천 앞바다",
       date: "24.02.01",
       likes: 98,
-      comments: 12,
+      comments: 8,
       image: "https://placehold.co/800x500",
       content: `추억에 남는 순간이었어요!`,
     },
   };
 
-  const selectedPost = post[postId] || post[1]; // 기본값 설정
+  const selectedPost = post[postId] || post[1];
 
   return (
     <div className="w-full max-w-[900px] mx-auto pt-6 pb-10">
@@ -59,26 +76,35 @@ export default function MemoryPost() {
         </div>
 
         <button>
-          <img src={moreIcon} alt="더보기" className="w-6 h-6" />
+          <img src={moreIcon} alt="더보기" className="w-6 h-6" onClick={handleMoreClick} />
         </button>
+        
+        {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} onEdit={() => setShowEditMemory(true)} />}
+        {showEditMemory  && <EditMemory onClose={() => setShowEditMemory(false)} />}
       </div>
 
       <div className="mt-4 flex items-center text-darkGray-active text-sm">
         <div className="flex space-x-2">
-        <span className="flex gap-1"><MapPinIcon className="w-5 h-5 text-gray-500" />{selectedPost.location}</span>
-        <span className="text-darkGray-hover">·</span>
-        <span className="flex gap-1"><CalendarIcon className="w-5 h-5 text-gray-500" />{selectedPost.date}</span>
+          <span className="flex gap-1">
+            <MapPinIcon className="w-5 h-5 text-gray-500" />
+            {selectedPost.location}
+          </span>
+          <span className="text-darkGray-hover">·</span>
+          <span className="flex gap-1">
+            <CalendarIcon className="w-5 h-5 text-gray-500" />
+            {selectedPost.date}
+          </span>
         </div>
 
         <div className="ml-6 flex space-x-2">
-        <div className="flex items-center space-x-1">
-          <img src={empathyIcon} alt="공감" className="w-5 h-5" />
-          <span>{selectedPost.likes}</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <img src={commentIcon} alt="댓글" className="w-5 h-5" />
-          <span>{selectedPost.comments}</span>
-        </div>
+          <div className="flex items-center space-x-1">
+            <img src={empathyIcon} alt="공감" className="w-5 h-5" />
+            <span>{selectedPost.likes}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <img src={commentIcon} alt="댓글" className="w-5 h-5" />
+            <span>{selectedPost.comments}</span>
+          </div>
         </div>
       </div>
 
@@ -90,7 +116,7 @@ export default function MemoryPost() {
 
       <div className="mt-[70px] mb-[40px] border-t border-darkWhite"></div>
 
-      <CommentSection />
+      <CommentSection comments={comments} postId={postId} />
     </div>
   );
 }

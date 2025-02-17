@@ -1,4 +1,7 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import userService from "@/services/user/userService";
+import { useToast } from "@/hooks/useToast";
 
 import PublicGroupCard from "@/components/common/PublicGroupCard";
 import NoticeCard from "@/components/main/NoticeCard";
@@ -19,12 +22,28 @@ const memoryData = [
 ];
 
 export default function Main() {
+  const [nickname, setNickname] = useState("예비 사용자");
   const navigate = useNavigate();
+  const addToast = useToast();
+    
+    useEffect(() => {
+      const fetchUserInfo = async () => {
+        try {
+          const data = await userService.getUserInfo();
+          setNickname(data.data.nickname);
+        } catch {
+          addToast("사용자 정보를 불러올 수 없습니다.");
+        }
+      };
+    
+      fetchUserInfo();
+    }, []);
+    
   return (
     <div className="w-full h-full pt-3 pb-7 overflow-auto">
       <div className="flex items-center mb-1">
         <span className="text-darkViolet text-2xl font-semibold">
-          홍길동
+        {nickname}
         </span>
         <span className="text-black text-2xl font-semibold">
         님, 안녕하세요!
