@@ -7,7 +7,7 @@ export default function PageLayout({ children }) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-background"> 
       <ScrollToTop />
-      <div className="w-full ">
+      <div className="w-full bg-background">
         <Header />
       </div>
 
