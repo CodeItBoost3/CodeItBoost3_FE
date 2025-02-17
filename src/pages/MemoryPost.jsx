@@ -9,9 +9,11 @@ import EditMemory from "@/components/modal/EditMemory";
 import empathyIcon from "@/assets/image/logo-image.svg";
 import commentIcon from "@/assets/icon/group/comment.svg";
 import moreIcon from "@/assets/icon/group/more.svg";
+import ScrapIcon from "@/assets/icon/group/bookmark-fill.svg?react";
 
 export default function MemoryPost() {
   const { postId } = useParams();
+  const [isBookmark, setIsBookmark] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
   const [showEditMemory, setShowEditMemory] = useState(false);
@@ -27,6 +29,10 @@ export default function MemoryPost() {
     setIsMoreOpen(false);
   };
 
+  const handleBookMark = () => {
+    // id값으로 api 요청로직 추가해야 함.
+    setIsBookmark(!isBookmark);
+  }
 
   const post = {
     1: {
@@ -57,6 +63,8 @@ export default function MemoryPost() {
 
   const selectedPost = post[postId] || post[1];
 
+  const iconStyle = "size-7 cursor-pointer";
+
   return (
     <div className="w-full max-w-[900px] mx-auto pt-6 pb-10">
       <div className="flex justify-between items-start">
@@ -74,10 +82,16 @@ export default function MemoryPost() {
             ))}
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <ScrapIcon
+              onClick={handleBookMark}
+              className={`${iconStyle} ${isBookmark ? "fill-normalViolet stroke-normalViolet" : " stroke-darkGray-active [&>path:first-child]:fill-none"}`}
+          />
+          <button>
+            <img src={moreIcon} alt="더보기" className="w-6 h-6" onClick={handleMoreClick} />
+          </button>
+        </div>
 
-        <button>
-          <img src={moreIcon} alt="더보기" className="w-6 h-6" onClick={handleMoreClick} />
-        </button>
         
         {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} onEdit={() => setShowEditMemory(true)} />}
         {showEditMemory  && <EditMemory onClose={() => setShowEditMemory(false)} />}
