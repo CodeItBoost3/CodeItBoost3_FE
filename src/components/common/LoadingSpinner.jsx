@@ -2,6 +2,7 @@ import mainLogo from '@/assets/image/logo-image.svg';
 
 export default function LoadingSpinner({ size = 200 }) {
   return (
+    <div className="flex justify-center items-center w-full h-full min-h-screen">
     <div
       className="relative flex items-center justify-center"
       style={{ height: `${size}px`, width: `${size}px` }}
@@ -18,7 +19,7 @@ export default function LoadingSpinner({ size = 200 }) {
           r="45"
           strokeWidth="11"
           fill="none"
-          className="stroke-lightGrey"
+          className="stroke-lightGray"
         />
         <circle
           cx="50"
@@ -29,10 +30,11 @@ export default function LoadingSpinner({ size = 200 }) {
           strokeLinecap="round"
           strokeDasharray="45 240"
           strokeDashoffset="100"
-          className="origin-center animate-spin border stroke-mainGreen"
+          className="origin-center animate-spin border stroke-normalViolet"
         />
       </svg>
       <img src={mainLogo} className="absolute w-[40%]" alt="로고" />
+    </div>
     </div>
   );
 }

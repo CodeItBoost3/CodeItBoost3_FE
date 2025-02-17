@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useToast } from "@/hooks/useToast";
+import { useSearchParams, useParams } from 'react-router-dom';
 
+import groupService from '@/services/group/groupService';
 import GroupTab from '@/components/group/GroupTab';
 import SearchBar from "@/components/common/SearchBar";
 import SearchButton from "@/components/common/SearchButton";
@@ -17,25 +19,69 @@ import LogoImage from "@/assets/image/logo-image.svg";
 import MoreIcon from "@/assets/icon/group/more.svg";
 
 export default function GroupDetail() {
-  const [searchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { groupId } = useParams();
+  const addToast = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  // eslint-disable-next-line
+  const [groupData, setGroupData] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
   const [showEditGroup, setShowEditGroup] = useState(false);
-
+  const [group, setGroup] = useState(null);
   const totalPages = 10;
   const GROUP_PARAMS = 'group';
   const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
-  const options = ["최신순", "공감순", "조회순"];
+    // eslint-disable-next-line
+  const [isPublic, setIsPublic] = useState('true');
+  const options = [
+    { label: "최신순", value: "latest" },
+    { label: "추억 많은 순", value: "mostPosted" },
+    { label: "배지 많은 순", value: "mostBadge" },
+    { label: "공감순", value: "mostLiked" }
+  ];
 
-  const handleSearch = () => {
-    console.log("검색어:", searchTerm);
+  useEffect(() => {
+    const fetchGroupDetail = async () => {
+      try {
+        const data = await groupService.getGroupDetail(groupId);
+        
+        if (!data) {
+          addToast("해당 그룹을 찾을 수 없습니다.");
+          return;
+        }
+  
+        setGroup(data);
+        setIsPublic(data.isPublic);
+      } catch {
+        addToast("그룹 상세 조회에 실패했습니다.");
+      }
+    };
+  
+    if (groupId) fetchGroupDetail();
+  }, [groupId]);
+  
+  useEffect(() => {
+    setSortBy(searchParams.get("sortBy") || "mostLiked");
+  }, [searchParams]);
+
+  const handleSearch = async () => {
+    try {
+      const data = await groupService.searchGroups(searchTerm);
+      setGroupData(data.data || []);
+    } catch {
+      addToast("그룹 검색에 실패했습니다.");
+    }
   };
-
-  const handleSelect = (selected) => {
-    console.log("선택된 옵션:", selected);
+  
+  const handleSelect = (selectedValue) => {
+    if (selectedValue !== sortBy) {
+      setSortBy(selectedValue);
+      setSearchParams({ sortBy: selectedValue, group: tabName }, { replace: true });
+    }
   };
 
   const handlePageChange = (page) => {
@@ -73,8 +119,8 @@ export default function GroupDetail() {
             <span className="text-sm text-darkGray-active">| 공개</span>
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-black">달봉이네 가족</h1>
-            <p className="text-sm text-darkerGray">서로 한 마음으로 응원하고 아끼는 달봉이네 가족입니다.</p>
+            <h1 className="text-2xl font-bold text-black">{group?.groupName || "그룹 이름"}</h1>
+            <p className="text-sm text-darkerGray">{group?.groupDescription || "그룹 설명이 없습니다."}</p>
           </div>
 
           <div className="space-y-2">
@@ -121,7 +167,8 @@ export default function GroupDetail() {
         <GroupTab />
 
         <div className="flex mt-4 items-center gap-5">
-          <Select options={options} onSelect={handleSelect} />
+          <Select options={options} onSelect={handleSelect} value={sortBy} />
+         
           <SearchBar
             name="search"
             placeholder="그룹 이름을 검색해 주세요."

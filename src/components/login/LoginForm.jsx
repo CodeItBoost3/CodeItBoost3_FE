@@ -12,11 +12,17 @@ export default function LoginForm({ onClose, onNavigateHome }) {
       const response = await authService.login(clientId, password);
   
       const { accessToken } = response.data;
-  
+
+
+      const expires = new Date();
+      expires.setHours(expires.getHours() + 24);
+      localStorage.setItem("tokenExpires", expires.toISOString());
+
       localStorage.setItem("accessToken", `${accessToken}`);
   
       addToast("로그인에 성공하였습니다.");
       onNavigateHome();
+
     } catch (error) {
       if (error.response) {
         const { status } = error.response;

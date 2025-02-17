@@ -13,7 +13,7 @@ export default function PublicGroupCard({ id, image, days, title, description, p
   };
 
     return (
-      <div onClick={handleClick} className="cursor-default hover:shadow-card w-[20vw] min-h-[45vh] h-auto bg-white rounded-[7px] border border-lightViolet flex flex-col overflow-hidden">
+      <div onClick={handleClick} className="cursor-default min-w-[210px] hover:shadow-card w-[20vw] min-h-[45vh] h-auto bg-white rounded-[7px] border border-lightViolet flex flex-col overflow-hidden">
         <div className="relative w-full p-5 h-[30vh]">
           <img
             className=" rounded-md w-full h-full object-cover"

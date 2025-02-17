@@ -3,12 +3,12 @@ import { ChevronDown } from "lucide-react";
 
 const Select = ({ options, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(options[0]);
+  const [selectedOption, setSelectedOption] = useState(options[0].value); // ✅ value만 저장
 
   const handleSelect = (option) => {
-    setSelectedOption(option);
+    setSelectedOption(option.value);
     setIsOpen(false);
-    if (onSelect) onSelect(option);
+    if (onSelect) onSelect(option.value);
   };
 
   return (
@@ -18,7 +18,7 @@ const Select = ({ options, onSelect }) => {
         className="flex items-center justify-between w-full px-4 py-2 text-left bg-white border active:border-gray-300 rounded-xl"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <span>{selectedOption}</span>
+        <span>{options.find(opt => opt.value === selectedOption)?.label}</span> {/* ✅ label 렌더링 */}
         <ChevronDown className="w-4 h-4 text-gray-500" />
       </button>
 
@@ -29,11 +29,11 @@ const Select = ({ options, onSelect }) => {
             <li
               key={index}
               className={`px-4 py-2 m-1 rounded-lg cursor-pointer hover:bg-gray-100 ${
-                selectedOption === option ? "bg-gray-100" : ""
+                selectedOption === option.value ? "bg-gray-100" : ""
               }`}
               onClick={() => handleSelect(option)}
             >
-              {option}
+              {option.label}
             </li>
           ))}
         </ul>
