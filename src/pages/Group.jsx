@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams } from "react-router-dom";
+
 import groupService from "@/services/group/groupService";
 
 import NoGroupImg from "@/assets/icon/group/no-group.svg";
@@ -16,17 +17,24 @@ import Select from "@/components/common/Select";
 
 const GROUP_PARAMS = "group";
 
-const options = ["최신순", "공감순", "조회순"];
+const options = [
+  { label: "최신순", value: "latest" },
+  { label: "추억 많은 순", value: "mostPosted" },
+  { label: "배지 많은 순", value: "mostBadge" },
+  { label: "공감순", value: "mostLiked" }
+];
+
 
 export default function Group() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchParams] = useSearchParams();
-  const tabName = searchParams.get(GROUP_PARAMS) || "Public";
-  const isPublic = tabName === "Public";
-  const addToast = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [groupData, setGroupData] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
+  const tabName = searchParams.get(GROUP_PARAMS) || "Public";
+  const isPublic = tabName === "Public";
+  const addToast = useToast();
   const totalPages = 10;
 
   useEffect(() => {
@@ -34,29 +42,36 @@ export default function Group() {
       try {
         const data = await groupService.getGroupList({
           type: isPublic ? "public" : "private",
-          sortBy: "latest",
+          sortBy,
           keyword: searchTerm,
         });
-  
+
         setGroupData(data.data || []);
       } catch {
-        addToast("그룹 목록 조회 실패");
-      }
+        addToast("그룹 목록 조회에 실패했습니다.");
+      } 
     };
 
     fetchGroupList();
-  }, [isPublic, searchTerm]);
+  }, [isPublic, searchTerm, sortBy]);
 
+  useEffect(() => {
+    setSortBy(searchParams.get("sortBy") || "mostLiked");
+  }, [searchParams]);
+  
   const handleSearch = () => {
     console.log("검색어:", searchTerm);
   };
 
-  const handleSelect = (selected) => {
-    console.log("선택된 옵션:", selected);
-  };
-
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleSelect = (selectedValue) => {
+    if (selectedValue !== sortBy) {
+      setSortBy(selectedValue);
+      setSearchParams({ sortBy: selectedValue, group: tabName }, { replace: true });
+    }
   };
 
   return (
@@ -68,11 +83,9 @@ export default function Group() {
 
       <GroupTab />
 
-      <div
-        className="flex mt-4 items-center gap-5"
-        style={{ flexBasis: '60%' }}
-      >
-        <Select options={options} onSelect={handleSelect} />
+      <div className="flex mt-4 items-center gap-5" style={{ flexBasis: '60%' }}>
+        <Select options={options} onSelect={handleSelect} value={sortBy} />
+
         <SearchBar
           name="search"
           placeholder="그룹 이름을 검색해 주세요."
@@ -95,8 +108,8 @@ export default function Group() {
             groupData.map((group) =>
               isPublic ? (
                 <PublicGroupCard
-                  id={group.id}
-                  key={group.id}
+                  id={group.groupId}
+                  key={group.groupId}
                   title={group.groupName}
                   description={group.description}
                   image={group.image}
@@ -107,8 +120,8 @@ export default function Group() {
                 />
               ) : (
                 <PrivateGroupCard
-                  id={group.id}
-                  key={group.id}
+                  id={group.groupId}
+                  key={group.groupId}
                   title={group.groupName}
                   days={group.dday}
                   emotioncount={group.likeCount}
@@ -118,15 +131,15 @@ export default function Group() {
             )
           ) : (
             <div className="bg-white min-w-[85vw] h-[80vh] max-h-[80vh] w-full rounded-[30px]">
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-            <img src={NoGroupImg} alt="No Group" className="w-30 h-30 mb-4" />
-            <p className="text-lg font-semibold">{isPublic ? "등록된 공개 그룹이 없습니다." : "등록된 비공개 그룹이 없습니다."}</p>
-            <p className="text-sm text-gray-400">가장 먼저 그룹을 만들어보세요!</p>
-            <button onClick={() => setIsModalOpen(true)}
-                    className="mt-4 px-5 py-2 bg-normalViolet hover:bg-normalViolet-hover active:bg-normalViolet-active text-white text-sm font-medium rounded-md">
-              그룹 만들기
-            </button>
-            </div>
+              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+              <img src={NoGroupImg} alt="No Group" className="w-30 h-30 mb-4" />
+              <p className="text-lg font-semibold">{isPublic ? "등록된 공개 그룹이 없습니다." : "등록된 비공개 그룹이 없습니다."}</p>
+              <p className="text-sm text-gray-400">가장 먼저 그룹을 만들어보세요!</p>
+              <button onClick={() => setIsModalOpen(true)}
+                      className="mt-4 px-5 py-2 bg-normalViolet hover:bg-normalViolet-hover active:bg-normalViolet-active text-white text-sm font-medium rounded-md">
+                그룹 만들기
+              </button>
+              </div>
           </div>
           )}
           {isModalOpen && <CreateGroup onClose={() => setIsModalOpen(false)} />}

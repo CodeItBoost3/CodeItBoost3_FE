@@ -18,7 +18,7 @@ export const createGroup = async (formData) => {
 };
 
 /** 그룹 목록 조회 */
-export const getGroupList = async ({ type = "", sortBy = "mostLiked", keyword = "" }) => {
+export const getGroupList = async ({ type = "", sortBy = "", keyword = "" }) => {
   try {
     const params = { sortBy };
 
@@ -38,14 +38,21 @@ export const getGroupList = async ({ type = "", sortBy = "mostLiked", keyword = 
   }
 };
 
-  
-
 /** 그룹 상세 조회 */
 export const getGroupDetail = async (groupId) => {
+  const token = localStorage.getItem("accessToken");
+
   return axiosInstance
-    .get(`/api/groups/${groupId}`)
-    .then((response) => response.data);
+    .get(`/api/groups/${groupId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => (response.data.status === "success" ? response.data.data : null))
+    .catch((error) => {
+      console.error("그룹 상세 조회 실패:", error);
+      throw error;
+    });
 };
+
 
 /** 그룹 수정 */
 export const updateGroup = async (groupId, updatedData) => {
@@ -89,6 +96,22 @@ export const deleteGroupImage = async (groupId) => {
     .then((response) => response.data);
 };
 
+/** 그룹 이름 검색 */
+export const searchGroups = async (keyword) => {
+  if (!keyword.trim()) {
+    throw new Error("검색어를 입력해 주세요.");
+  }
+
+  return axiosInstance
+    .get(`/api/groups/search`, { params: { keyword } })
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error("그룹 검색 실패:", error);
+      throw error;
+    });
+};
+
+
 const groupService = {
   createGroup,
   getGroupList,
@@ -96,6 +119,7 @@ const groupService = {
   updateGroup,
   deleteGroup,
   deleteGroupImage,
+  searchGroups
 };
 
 export default groupService;

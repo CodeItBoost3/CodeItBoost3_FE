@@ -21,26 +21,36 @@ const privateMemories = [
   { author: "달봉이아들", visibility: "비공개", title: '추억 글 제목', date: '24.02.01', likes: 98, comments: 12 },
 ];
 
+const options = [
+  { label: "최신순", value: "latest" },
+  { label: "추억 많은 순", value: "mostPosted" },
+  { label: "배지 많은 순", value: "mostBadge" },
+  { label: "공감순", value: "mostLiked" }
+];
 
-const options = ["최신순", "공감순", "조회순"];
 
 export default function Scrap () {
-  const [searchParams] = useSearchParams();
-  const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
+  
+  const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
   const totalPages = 10;
 
   const handleSearch = () => {
     console.log("검색어:", searchTerm);
   };
-
-  const handleSelect = (selected) => {
-    console.log("선택된 옵션:", selected);
-  };
   
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleSelect = (selectedValue) => {
+    if (selectedValue !== sortBy) {
+      setSortBy(selectedValue);
+      setSearchParams({ sortBy: selectedValue, group: tabName }, { replace: true });
+    }
   };
 
   return (
@@ -55,7 +65,7 @@ export default function Scrap () {
         className="flex mt-4 items-center gap-5"
         style={{ flexBasis: '60%' }}
       >
-        <Select options={options} onSelect={handleSelect} />
+        <Select options={options} onSelect={handleSelect} value={sortBy} />
         <SearchBar
           name="search"
           placeholder="그룹 이름을 검색해 주세요."

@@ -111,7 +111,7 @@ export default function Mypage() {
         </div>
         <div className="flex justify-between items-center mt-7 w-[98%]">
           <p className="text-base font-semibold">작성한 글 모음</p>
-          <p className="text-darkGray font-semibold text-xs">전체보기</p>
+          <button className="text-darkGray hover:text-darkGray-hover active:text-darkGray-active font-semibold text-xs">전체보기</button>
         </div>
         <div className="w-full h-auto flex mt-3 relative">
           {length > 4 &&
@@ -137,7 +137,7 @@ export default function Mypage() {
         </div>
         <div className="flex justify-between items-center mt-7 max-w-[98%]">
           <p className="text-base font-semibold">작성한 댓글 모음</p>
-          <p className="text-darkGray font-semibold text-xs">전체보기</p>
+          <button className="text-darkGray hover:text-darkGray-hover active:text-darkGray-active font-semibold text-xs">전체보기</button>
         </div>
         <div className="w-full h-auto flex mt-3 relative">
           {length > 4 &&
