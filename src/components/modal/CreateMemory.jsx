@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { FaTrash, FaTimes } from "react-icons/fa";
 import postService from "@/services/post/postService";
+import { useToast } from "@/hooks/useToast";
 
 export default function CreateMemory({ groupId, onClose }) {
   const [isPublic, setIsPublic] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const addToast = useToast();
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -61,43 +63,41 @@ export default function CreateMemory({ groupId, onClose }) {
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
-
+  
   /** 게시글 작성 요청 */
-  const handleCreatePost = async () => {
-    if (!formData.title.trim()) {
-      alert("제목을 입력해주세요.");
-      return;
-    }
-    if (!formData.content.trim()) {
-      alert("본문 내용을 입력해주세요.");
-      return;
-    }
-    if (!formData.memoryDate) {
-      alert("추억의 순간 날짜를 선택해주세요.");
-      return;
-    }
+const handleCreatePost = async () => {
+  if (!formData.title.trim()) {
+    addToast("제목을 입력해주세요.");
+    return;
+  }
+  if (!formData.content.trim()) {
+    addToast("본문 내용을 입력해주세요.");
+    return;
+  }
+  if (!formData.memoryDate) {
+    addToast("추억의 순간 날짜를 선택해주세요.");
+    return;
+  }
 
-    try {
-      const postData = {
-        title: formData.title,
-        content: formData.content,
-        location: formData.location,
-        moment: formData.memoryDate,
-        isPublic: isPublic.toString(),
-        tag: formData.tags,
-        imageFile: imageFile,
-      };
+  try {
+    const postData = {
+      title: formData.title,
+      content: formData.content,
+      location: formData.location,
+      moment: formData.memoryDate,
+      isPublic: isPublic,
+      tag: formData.tags,
+      imageFile: imageFile,
+    };
+    await postService.createPost(groupId, postData);
 
-      const response = await postService.createPost(groupId, postData);
-      console.log("게시글 생성 성공:", response);
+    addToast("게시글이 성공적으로 등록되었습니다.");
+    onClose();
+  } catch {
+    addToast("게시글 작성 중 오류가 발생했습니다.");
+  }
+};
 
-      alert("게시글이 성공적으로 등록되었습니다.");
-      onClose(); 
-    } catch (error) {
-      console.error("게시글 생성 실패:", error);
-      alert("게시글 작성 중 오류가 발생했습니다.");
-    }
-  };
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-10 z-20">
