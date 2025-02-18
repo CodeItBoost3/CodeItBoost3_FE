@@ -22,8 +22,6 @@ export default function GroupDetail() {
   const { groupId } = useParams();
   const addToast = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  // eslint-disable-next-line
-  const [groupData, setGroupData] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,11 +30,13 @@ export default function GroupDetail() {
   const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
   const [showEditGroup, setShowEditGroup] = useState(false);
   const [group, setGroup] = useState(null);
+  const [publicMemories, setPublicMemories] = useState([]);
+  const [privateMemories, setPrivateMemories] = useState([]);
+
   const totalPages = 10;
   const GROUP_PARAMS = 'group';
   const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
-    // eslint-disable-next-line
-  const [isPublic, setIsPublic] = useState('true');
+
   const options = [
     { label: "최신순", value: "latest" },
     { label: "추억 많은 순", value: "mostPosted" },
@@ -48,22 +48,49 @@ export default function GroupDetail() {
     const fetchGroupDetail = async () => {
       try {
         const data = await groupService.getGroupDetail(groupId);
-        
+
         if (!data) {
           addToast("해당 그룹을 찾을 수 없습니다.");
           return;
         }
-  
+
         setGroup(data);
-        setIsPublic(data.isPublic);
+        
+        setPublicMemories(
+          data.publicPosts
+            ? data.publicPosts.map(post => ({
+                author: post.author?.nickname || "알 수 없음",
+                visibility: "공개",
+                title: post.title || "제목 없음",
+                location: data.groupName || "알 수 없음",
+                date: post.createdAt ? new Date(post.createdAt).toLocaleDateString("ko-KR") : "날짜 없음",
+                tags: post.tags || [],
+                likes: post.likeCount || 0,
+                comments: post.commentCount || 0,
+              }))
+            : []
+        );
+
+        setPrivateMemories(
+          data.privatePosts
+            ? data.privatePosts.map(post => ({
+                author: post.author?.nickname || "알 수 없음",
+                visibility: "비공개",
+                title: post.title || "제목 없음",
+                date: post.createdAt ? new Date(post.createdAt).toLocaleDateString("ko-KR") : "날짜 없음",
+                likes: post.likeCount || 0,
+                comments: post.commentCount || 0,
+              }))
+            : []
+        );
       } catch {
         addToast("그룹 상세 조회에 실패했습니다.");
       }
     };
-  
+
     if (groupId) fetchGroupDetail();
   }, [groupId]);
-  
+
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
   }, [searchParams]);
@@ -71,7 +98,7 @@ export default function GroupDetail() {
   const handleSearch = async () => {
     try {
       const data = await groupService.searchGroups(searchTerm);
-      setGroupData(data.data || []);
+      setGroup(data.data || []);
     } catch {
       addToast("그룹 검색에 실패했습니다.");
     }
@@ -88,16 +115,6 @@ export default function GroupDetail() {
     setCurrentPage(page);
   };
 
-  const publicMemories = [
-    { author: "달봉이아들", visibility: "공개", title: '추억 글 제목', location: '인천 앞바다', date: '24.01.19', tags: ["태그", "길면", "두줄", "낚시", "인천"], likes: 120, comments: 8 },
-    { author: "달봉이아들", visibility: "공개", title: '추억 글 제목', location: '인천 앞바다', date: '24.02.01', tags: ["여행", "추억", "가족", "사진"], likes: 98, comments: 12 },
-  ];
-
-  const privateMemories = [
-    { author: "달봉이아들", visibility: "비공개", title: '추억 글 제목', date: '24.01.19', likes: 120, comments: 8 },
-    { author: "달봉이아들", visibility: "비공개", title: '추억 글 제목', date: '24.02.01', likes: 98, comments: 12 },
-  ];
-
   const handleMoreClick = (event) => {
     event.preventDefault();
     setIsMoreOpen(true);
@@ -111,42 +128,47 @@ export default function GroupDetail() {
   return (
     <div className="w-full max-w-[1200px] mx-auto py-3">
       <div className="flex flex-col md:flex-row p-6 relative">
-        <img className="w-[180px] h-[180px] rounded-lg object-cover" src="https://placehold.co/180x180" alt="그룹 이미지" />
+        <img 
+          className="w-[180px] h-[180px] rounded-lg object-cover"
+          src={group?.imageUrl ? `https://${group.imageUrl}` : "https://placehold.co/180x180"} 
+          alt="그룹 이미지" 
+        />
 
         <div className="flex-1 ml-6 space-y-4">
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-black">D+265</span>
-            <span className="text-sm text-darkGray-active">| 공개</span>
+            <span className="text-sm text-black">{group?.dday || "D+0"}</span>
+            <span className="text-sm text-darkGray-active">| {group?.isPublic ? "공개" : "비공개"}</span>
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-black">{group?.groupName || "그룹 이름"}</h1>
             <p className="text-sm text-darkerGray">{group?.groupDescription || "그룹 설명이 없습니다."}</p>
-          </div>
+            </div>
 
-          <div className="space-y-2">
-            <h1 className="mt-5 font-semibold text-base text-darkerGray ml-1">획득배지</h1>
-            <div className="mt-1 flex flex-col md:flex-row justify-between items-center">
-              <div className="flex flex-wrap gap-2">
-                <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">👾 7일 연속 추억 등록</span>
-                <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">🌼 그룹 공감 1만 개 이상 받기</span>
-                <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">💖 추억 공감 1만 개 이상 받기</span>
+            <div className="space-y-2">
+              <h1 className="mt-5 font-semibold text-base text-darkerGray ml-1">획득배지</h1>
+              <div className="mt-1 flex flex-col md:flex-row justify-between items-center">
+                <div className="flex flex-wrap gap-2">
+                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">👾 7일 연속 추억 등록</span>
+                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">🌼 그룹 공감 1만 개 이상 받기</span>
+                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">💖 추억 공감 1만 개 이상 받기</span>
+                </div>
+                
+              <div className="flex space-x-4 mt-3 md:mt-0">
+                <button className="px-5 py-2 whitespace-nowrap w-[110px] text-white bg-black hover:bg-black-hover active:bg-black-active rounded-lg">참여하기</button>
+                <button className="flex items-center w-[150px] whitespace-nowrap px-5 py-2 bg-white hover:bg-background active:bg-darkWhite border rounded-lg">
+                  <img src={LogoImage} alt="공감 아이콘" className="w-5 h-5 mr-2" />
+                  공감 보내기
+                </button>
               </div>
-              
-            <div className="flex space-x-4 mt-3 md:mt-0">
-              <button className="px-5 py-2 whitespace-nowrap w-[110px] text-white bg-black hover:bg-black-hover active:bg-black-active rounded-lg">참여하기</button>
-              <button className="flex items-center w-[150px] whitespace-nowrap px-5 py-2 bg-white hover:bg-background active:bg-darkWhite border rounded-lg">
-                <img src={LogoImage} alt="공감 아이콘" className="w-5 h-5 mr-2" />
-                공감 보내기
-              </button>
+              </div>
             </div>
-            </div>
-          </div>
         </div>
 
         <button className="absolute top-4 right-4" onClick={handleMoreClick}>
           <img src={MoreIcon} alt="더보기" />
         </button>
       </div>
+
       {isModalOpen && <CreateMemory onClose={() => setIsModalOpen(false)} />}
       {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} onEdit={() => setShowEditGroup(true)} />}
       {showEditGroup && <EditGroup onClose={() => setShowEditGroup(false)} />}
@@ -154,8 +176,8 @@ export default function GroupDetail() {
       <div className="my-[70px] border-t border-gray-200"></div>
 
       <div>
-        
-        <div className="flex gap-3 justify-start items-center mb-3">
+                
+      <div className="flex gap-3 justify-start items-center mb-3">
           <h2 className="text-2xl font-semibold text-black">
             <span className="text-darkViolet">달봉이네 가족</span>의 추억 목록
           </h2>
@@ -188,23 +210,15 @@ export default function GroupDetail() {
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {tabName === "Public"
             ? publicMemories.map((memory, index) => 
-                <PublicPostCard
-                    key={index}
-                    id={index + 1}
-                    groupId={1} 
-                    {...memory}
-                />)
+                <PublicPostCard key={index} id={index + 1} groupId={groupId} {...memory} />
+              )
             : privateMemories.map((memory, index) => 
-                <PrivatePostCard 
-                    key={index}
-                    id={index + 1}
-                    groupId={1} 
-                    {...memory}
-                />)}
+                <PrivatePostCard key={index} id={index + 1} groupId={groupId} {...memory} />
+              )}
         </div>
 
         <div className="p-6">
-        <Pagination
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
