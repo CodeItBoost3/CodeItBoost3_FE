@@ -1,4 +1,4 @@
-import SideBar from "@/layouts/SideBar";
+import SideBar from "@/layouts/Sidebar";
 import Header from "@/layouts/Header";
 import { Outlet } from 'react-router-dom';
 import ScrollToTop from "@/components/common/ScrollToTop";
