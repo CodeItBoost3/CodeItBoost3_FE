@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/useToast";
 
 import EditIcon from "@/assets/icon/mypage/edit.svg";
 import DefaultProfileImage from "@/assets/image/profile-basic1.svg"; 
@@ -11,38 +10,46 @@ import ProfileEditList from "@/components/mypage/ProfileEditList.jsx";
 
 export default function ProfileEditCard({ onClickEdit }) {
   const [nickname, setNickname] = useState("");
-  const [userId, setUserId] = useState(""); // 추후 실제 유저 아이디로 변경
+  const [clientId, setClientId] = useState("");
   const [profileImage, setProfileImage] = useState(DefaultProfileImage);
-  const addToast = useToast();
+
+  const fetchUserInfo = async () => {
+    try {
+      const userData = await userService.getUserInfo();
+      setNickname(userData.data.nickname);
+      setClientId(userData.data.clientId);
+
+      if (!userData.data.profileImageUrl || userData.data.profileImageUrl.includes("null")) {
+        setProfileImage(DefaultProfileImage);
+      } else {
+        const absoluteImageUrl = `https://${userData.data.profileImageUrl}`;
+        setProfileImage(absoluteImageUrl);
+      }
+    } catch {
+      console.log("사용자 정보를 불러올 수 없습니다.");
+    }
+  };
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const userData = await userService.getUserInfo();
-
-        setNickname(userData.data.nickname);
-        setUserId(userData.data.id);
-
-        if (userData.data.profileImageUrl) {
-          setProfileImage(userData.data.profileImageUrl);
-        }
-      } catch {
-        addToast("사용자 정보를 불러올 수 없습니다.");
-      }
-    };
-
     fetchUserInfo();
   }, []);
+  useEffect(() => {
+    fetchUserInfo(); 
+  }, [onClickEdit]); 
+  const handleProfileUpdated = () => {
+    fetchUserInfo();
+  };
 
   const profileData = [
     { id: 1, title: "닉네임", data: nickname },
-    { id: 2, title: "아이디", data: userId },
+    { id: 2, title: "아이디", data: clientId },
     { id: 3, title: "비밀번호", data: "*인증필요" },
   ];
 
+
   return (
     <div className="w-[29vw] min-h-[30vh] h-auto bg-white rounded-lg border border-normalGray relative p-7">
-      <button className="absolute right-4 top-3.5 w-5 h-5 bg-white rounded-full shadow-card p-1" onClick={onClickEdit}>
+      <button className="absolute right-4 top-3.5 w-5 h-5 bg-white rounded-full shadow-card p-1" onClick={() => onClickEdit(handleProfileUpdated)} >
         <img src={EditIcon} />
       </button>
       <div className="flex items-center gap-2.5 border-b border-gray-200 pb-2.5">
