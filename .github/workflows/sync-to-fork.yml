@@ -1,0 +1,33 @@
+name: Sync Fork with Upstream
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  sync:
+    if: github.repository == 'CodeItBoost3/CodeItBoost3_FE'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Set up Git
+        run: |
+          git config user.name "Dubabbi"
+          git config user.email "thdms3160@naver.com"
+
+      - name: Add Fork as Remote
+        run: git remote add fork https://github.com/Dubabbi/CodeItBoost3_FE.git
+
+      - name: Push changes to Fork
+        env:
+          GITHUB_USERNAME: Dubabbi
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git push -f https://Dubabbi:$GITHUB_TOKEN@github.com/Dubabbi/CodeItBoost3_FE.git develop
+ 
