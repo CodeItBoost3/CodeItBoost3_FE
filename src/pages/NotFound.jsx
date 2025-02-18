@@ -1,6 +1,6 @@
 import {useNavigate} from "react-router-dom";
 
-import SideBar from "@/layouts/SideBar";
+import SideBar from "@/layouts/Sidebar";
 import Header from "@/layouts/Header";
 
 import ScrollToTop from "@/components/common/ScrollToTop";
