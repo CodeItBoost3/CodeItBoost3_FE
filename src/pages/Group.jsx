@@ -30,12 +30,12 @@ export default function Group() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [groupData, setGroupData] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
   const tabName = searchParams.get(GROUP_PARAMS) || "Public";
   const isPublic = tabName === "Public";
   const addToast = useToast();
-  const totalPages = 10;
 
   useEffect(() => {
     const fetchGroupList = async () => {
@@ -44,16 +44,19 @@ export default function Group() {
           type: isPublic ? "public" : "private",
           sortBy,
           keyword: searchTerm,
+          page: currentPage,
         });
 
         setGroupData(data.data || []);
+        setCurrentPage(currentPage);
+        setTotalPages(totalPages);
       } catch {
         addToast("그룹 목록 조회에 실패했습니다.");
       } 
     };
 
     fetchGroupList();
-  }, [isPublic, searchTerm, sortBy]);
+  }, [isPublic, searchTerm, sortBy, currentPage]);
 
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
@@ -62,11 +65,7 @@ export default function Group() {
   const handleSearch = () => {
     console.log("검색어:", searchTerm);
   };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
+  
   const handleSelect = (selectedValue) => {
     if (selectedValue !== sortBy) {
       setSortBy(selectedValue);
@@ -147,7 +146,11 @@ export default function Group() {
       </div>
 
       <div className="p-4">
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}  
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );
