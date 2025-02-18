@@ -5,9 +5,11 @@ import { useToast } from "@/hooks/useToast";
 
 import PublicGroupCard from "@/components/common/PublicGroupCard";
 import NoticeCard from "@/components/main/NoticeCard";
-import image from "@/assets/icon/main/default-image.png";
 import MemoryCard from "@/components/main/MemoryCard";
 import MemoryActions from "@/components/main/MemoryAction";
+
+import image from "@/assets/icon/main/default-image.png";
+import NoArticleIcon from "@/assets/icon/main/edit.svg";
 
 const groupData = [
   { id: 1, title: "그룹 1", description: "설명 1", image: image, picturecount: "5", emotioncount: "3", badgecount: "5", days: "D+251" },
@@ -17,11 +19,12 @@ const groupData = [
 ];
 
 const memoryData = [
-  { id: 1, title: "글 제목 1", date: "2025.01.21", memory: "8", sympathy: "5", comments: "5" },
-  { id: 2, title: "글 제목 2", date: "2025.01.20", memory: "12", sympathy: "7", comments: "9" },
+  // { id: 1, title: "글 제목 1", date: "2025.01.21", memory: "8", sympathy: "5", comments: "5" },
+  // { id: 2, title: "글 제목 2", date: "2025.01.20", memory: "12", sympathy: "7", comments: "9" },
 ];
 
 export default function Main() {
+  // const [token, setToken] = useState("");
   const [nickname, setNickname] = useState("예비 사용자");
   const navigate = useNavigate();
   const addToast = useToast();
@@ -38,6 +41,10 @@ export default function Main() {
     
       fetchUserInfo();
     }, []);
+
+    // useEffect(() => {
+    //   setToken(localStorage.getItem("accessToken"));
+    // }, [])
     
   return (
     <div className="w-full h-full pt-3 pb-7 overflow-auto">
@@ -89,7 +96,7 @@ export default function Main() {
       </div>
       {/* 섹션 1 카드 */}
       <div className="h-auto w-full bg-white rounded-[17.33px] p-4 shadow-md flex flex-col gap-5">
-        {memoryData.map((item, idx) => (
+        {memoryData?.map((item, idx) => (
           <MemoryCard
             key={item.id}
             index={idx}
@@ -100,11 +107,21 @@ export default function Main() {
             comments={item.comments}
           />
         ))}
+        {memoryData.length === 0 &&
+            <div className="flex flex-col items-center justify-center h-[30vh] text-center text-gray-500">
+              <img src={NoArticleIcon} alt="No Group" className="w-30 h-30 mb-4"/>
+              <p className="text-xl font-semibold">최근에 내가 작성한 추억글이 없습니다.</p>
+              <p className="text-sm text-gray-400">첫번째 추억글을 작성해보세요!</p>
+              <button className="mt-4 px-5 py-2 bg-normalViolet hover:bg-normalViolet-hover active:bg-normalViolet-active text-white text-sm font-medium rounded-md">
+                추억 올리기
+              </button>
+            </div>
+        }
       </div>
     </div>
-      {/* 섹션 2 */}
-      <MemoryActions widthClass="flex-1" marginTop="mt-[7vh]" />
-    </div>
+        {/* 섹션 2 */}
+        <MemoryActions widthClass="flex-1" marginTop="mt-[7vh]"/>
+      </div>
 
     </div>
   );
