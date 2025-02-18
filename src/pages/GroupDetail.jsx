@@ -3,7 +3,6 @@ import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams } from 'react-router-dom';
 
 import groupService from '@/services/group/groupService';
-import GroupTab from '@/components/group/GroupTab';
 import SearchBar from "@/components/common/SearchBar";
 import SearchButton from "@/components/common/SearchButton";
 import Select from '@/components/common/Select';
@@ -186,7 +185,6 @@ export default function GroupDetail() {
           </button>
           
         </div>
-        <GroupTab />
 
         <div className="flex mt-4 items-center gap-5">
           <Select options={options} onSelect={handleSelect} value={sortBy} />
