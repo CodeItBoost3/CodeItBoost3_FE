@@ -18,9 +18,9 @@ export const createGroup = async (formData) => {
 };
 
 /** 그룹 목록 조회 */
-export const getGroupList = async ({ type = "", sortBy = "", keyword = "" }) => {
+export const getGroupList = async ({ type = "", sortBy = "", keyword = "", page = 1 }) => {
   try {
-    const params = { sortBy };
+    const params = { sortBy, page };
 
     if (type) {
       params.type = type;

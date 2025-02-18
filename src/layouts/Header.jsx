@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Logo from "@/layouts/Logo";
 import { BellIcon, UserIcon } from "@heroicons/react/24/outline";
-import Notification from "@/components/notification/notification";
+import Notification from "@/components/notification/Notification";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);

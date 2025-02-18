@@ -3,11 +3,11 @@ import { useRef, useState, useEffect } from "react";
 import LoadingSpinner from "@/components/common/LoadingSpinner"
 import PublicPostCard from "@/components/group/PublicPostCard.jsx";
 import ProfileEditCard from "@/components/mypage/ProfileEditCard.jsx";
-import MemoryAction from "@/components/Main/MemoryAction.jsx";
+import MemoryAction from "@/components/main/MemoryAction.jsx";
 import GroupCard from "@/components/mypage/GroupCard.jsx";
 import Reply from "@/components/mypage/Reply.jsx";
 import EditProfile from "@/components/modal/EditProfile.jsx";
-import PassWordChange from "@/components/modal/PassWordChange.jsx";
+import PassWordChange from "@/components/modal/PasswordChange.jsx";
 
 import userService from "@/services/user/userService";
 
