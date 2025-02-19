@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaTrash, FaTimes } from "react-icons/fa";
 
-export default function EditMemory({ onClose }) {
-  const [isPublic, setIsPublic] = useState(true);
+import postService from "@/services/post/postService";
+import { useToast } from "@/hooks/useToast";
+
+export default function EditMemory({ post, onClose, onUpdate }) {
+  const addToast = useToast();
   const [previewImage, setPreviewImage] = useState(null);
   const [formData, setFormData] = useState({
     nickname: "",
@@ -13,6 +16,21 @@ export default function EditMemory({ onClose }) {
     content: "",
   });
 
+  useEffect(() => {
+    if (post) {
+      setFormData({
+        title: post.title || "",
+        tags: post.tag || [],
+        location: post.location || "",
+        memoryDate: post.moment?.split("T")[0] || "",
+        content: post.content || "",
+      });
+      if (post.imageUrl) {
+        setPreviewImage(`https://${post.imageUrl}`);
+      }
+    }
+  }, [post]);
+  
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -54,6 +72,33 @@ export default function EditMemory({ onClose }) {
     }));
   };
 
+  const handleEditPost = async () => {
+    if (!post || !post.postId) {
+      addToast("수정할 게시글 정보가 없습니다.");
+      return;
+    }
+  
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("content", formData.content);
+    formDataToSend.append("tag", JSON.stringify(formData.tags));
+    formDataToSend.append("location", formData.location);
+    formDataToSend.append("moment", formData.memoryDate); 
+  
+    if (previewImage && previewImage instanceof File) {
+      formDataToSend.append("image", previewImage);
+    }
+  
+    try {
+      const updatedPost = await postService.updatePost(post.postId, formDataToSend);
+      onUpdate(updatedPost.data); 
+      onClose();
+    } catch {
+      addToast("게시글 수정에 실패했습니다.");
+    }
+  };
+
+  
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-10 z-20">
       <div className="relative w-[90%] md:w-[65%] min-h-[70%] h-auto px-6 md:px-[65px] pt-[40px] pb-[70px] bg-white rounded-[20px] shadow-md border border-darkWhite flex flex-col justify-start items-center overflow-auto">
@@ -63,7 +108,7 @@ export default function EditMemory({ onClose }) {
         </button>        
 
         <h2 className="text-center text-xl font-semibold text-darkViolet mb-4">
-          <span className="text-black">달봉이네 가족</span>에 새로운 추억 기록하기
+          <span className="text-black">추억 글 수정하기</span>
         </h2>
 
         <div className="flex flex-col md:flex-row gap-6 w-full">
@@ -79,7 +124,7 @@ export default function EditMemory({ onClose }) {
                   value={formData.title}
                   onChange={handleChange}
                   className="w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
-                  placeholder="그룹 이름"
+                  placeholder="추억 글 이름"
                 />
               </div>
 
@@ -179,21 +224,17 @@ export default function EditMemory({ onClose }) {
                   className="w-[136.26px] h-[28.31px] px-[10.53px] py-[9.87px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
                 />
               </div>
-              <div className="flex-col items-center space-y-3">
-              <label className="text-black text-[13.17px] font-medium">
-                  추억 공개 선택
-                </label>
-                <div className="flex items-center gap-3">
-                <span className="text-xs">공개</span>
-                <div className={`relative w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${isPublic ? "bg-darkViolet" : "bg-darkGray-hover"}`} onClick={() => setIsPublic(!isPublic)}>
-
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-md transform ${isPublic ? "translate-x-6" : "translate-x-0"} transition-transform`} />
-                  </div>
-                  </div>
-              </div>
             </div>
           </div>
-
+        </div>
+        <div className="flex justify-center w-full mt-6">
+          <button
+            onClick={handleEditPost}
+            className="w-[150px] h-[40px] bg-normalViolet text-white font-medium text-sm rounded-lg 
+                       hover:bg-normalViolet-hover active:bg-normalViolet-active transition"
+          >
+            수정하기
+          </button>
         </div>
       </div>
     </div>

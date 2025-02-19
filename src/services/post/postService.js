@@ -55,18 +55,20 @@ export const getPostDetail = async (postId) => {
 };
 
 /** 게시글 수정 */
-export const updatePost = async (postId, updatedData) => {
+export const updatePost = async (postId, formData) => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
-  return axiosInstance
-    .put(`/api/posts/${postId}`, updatedData, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((response) => response.data);
+  return axiosInstance.put(`/api/posts/${postId}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  }).then(response => response.data);
 };
+
 
 /** 게시글 삭제 */
 export const deletePost = async (postId) => {

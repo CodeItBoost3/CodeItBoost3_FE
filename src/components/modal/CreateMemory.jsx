@@ -125,7 +125,7 @@ const handleCreatePost = async () => {
                   value={formData.title}
                   onChange={handleChange}
                   className="focus:outline-normalViolet w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
-                  placeholder="게시글 제목"
+                  placeholder="추억 글 제목"
                 />
               </div>
 

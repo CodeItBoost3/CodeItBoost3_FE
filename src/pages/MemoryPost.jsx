@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useToast } from "@/hooks/useToast";
 
 import postService from "@/services/post/postService";
 import scrapService from "@/services/scrap/scrapService";
@@ -17,6 +18,7 @@ import postInteractionService from "../services/post/postInteractionService";
 
 export default function MemoryPost() {
   const { postId } = useParams();
+  const addToast = useToast();
   const [isBookmark, setIsBookmark] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
@@ -29,8 +31,8 @@ export default function MemoryPost() {
       try {
         const response = await scrapService.checkScrapStatus(postId);
         setIsBookmark(response.data.isScrapped);
-      } catch (error) {
-        console.error("스크랩 여부 조회 실패:", error);
+      } catch {
+        addToast("스크랩 여부 조회에 실패했습니다.");
       }
     };
   
@@ -46,8 +48,8 @@ export default function MemoryPost() {
         if (response.status === "success" && response.data) {
           setPost(response.data);
         }
-      } catch (error) {
-        console.error("게시글 상세 조회 실패:", error);
+      } catch {
+        addToast("게시글 상세 조회에 실패했습니다");
       }
     };
 
@@ -77,8 +79,8 @@ export default function MemoryPost() {
           setIsBookmark(false);
         }
       }
-    } catch (error) {
-      console.error("북마크 추가/삭제 실패:", error);
+    } catch {
+      addToast("북마크 추가/삭제에 실패했습니다.");
     }
   };
 
@@ -122,7 +124,13 @@ export default function MemoryPost() {
         </div>
 
         {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} onEdit={() => setShowEditMemory(true)} />}
-        {showEditMemory  && <EditMemory onClose={() => setShowEditMemory(false)} />}
+        {showEditMemory && (
+          <EditMemory 
+            post={post}
+            onClose={() => setShowEditMemory(false)}
+            onUpdate={(updatedPost) => setPost(updatedPost)}
+          />
+        )}
       </div>
 
       <div className="mt-4 flex items-center text-darkGray-active text-sm">
