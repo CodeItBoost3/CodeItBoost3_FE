@@ -40,20 +40,24 @@ export default function Group() {
   useEffect(() => {
     const fetchGroupList = async () => {
       try {
-        const data = await groupService.getGroupList({
+        const response = await groupService.getGroupList({
           type: isPublic ? "public" : "private",
           sortBy,
           keyword: searchTerm,
           page: currentPage,
         });
-
-        setGroupData(data.data || []);
-        setCurrentPage(currentPage);
-        setTotalPages(totalPages);
+    
+        if (response.status === "success") {
+          setGroupData(response.data.groups || []);
+          setTotalPages(response.data.totalPage);
+        } else {
+          throw new Error("그룹 목록 조회 실패");
+        }
       } catch {
         addToast("그룹 목록 조회에 실패했습니다.");
-      } 
+      }
     };
+    
 
     fetchGroupList();
   }, [isPublic, searchTerm, sortBy, currentPage]);
