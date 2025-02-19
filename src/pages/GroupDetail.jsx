@@ -199,6 +199,7 @@ export default function GroupDetail() {
       setIsMember(false);
   
       const updatedGroup = await groupService.getGroupDetail(groupId);
+      navigate('/group');
       setGroup(updatedGroup);
     } catch (error) {
       addToast(error.message || "그룹 떠나기 중 오류가 발생했습니다.");

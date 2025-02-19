@@ -22,7 +22,7 @@ export const verifyGroupPassword = async (groupId, password) => {
     .post(`/api/groups/${groupId}/verify-password`, { password })
     .then((response) => response.data);
 };
-/** 그룹 비밀번호 검증 */
+
 
 /** 그룹 가입 */
 export const joinGroup = async (groupId) => {

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/useToast";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
+import userService from "@/services/user/userService";
 import groupService from "@/services/group/groupService";
-
+import groupInteractionService from "@/services/group/groupInteractionService";
+import PrivateGroupModal from "@/components/modal/PrivateGroupModal";
 import NoGroupImg from "@/assets/icon/group/no-group.svg";
 
 import CreateGroup from "@/components/modal/CreateGroup"; 
@@ -32,11 +34,28 @@ export default function Group() {
   const [groupData, setGroupData] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [myId, setMyId] = useState(null);
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const navigate = useNavigate();
   const tabName = searchParams.get(GROUP_PARAMS) || "Public";
   const isPublic = tabName === "Public";
   const addToast = useToast();
 
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userInfo = await userService.getUserInfo();
+        setMyId(userInfo.data.id);
+      } catch {
+        addToast("사용자 정보를 불러오는 중 오류가 발생했습니다.");
+      }
+    };
+  
+    fetchUserInfo();
+  }, []);
+  
   useEffect(() => {
     const fetchGroupList = async () => {
       try {
@@ -77,6 +96,52 @@ export default function Group() {
     }
   };
 
+  const handlePrivateGroupClick = async (groupId) => {
+    if (!myId) {
+      addToast("사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      console.log("[DEBUG] myId가 존재하지 않음, 사용자 정보 로드 중.");
+      return;
+    }
+  
+  
+    try {
+      const response = await groupService.getGroupDetail(groupId);
+  
+      const groupData = response;
+  
+      const isUserMember = groupData.members.some(member => member.userId === myId);
+  
+      if (!isUserMember && groupData.isPublic === false) {
+        setSelectedGroupId(groupId);
+        setIsPasswordModalOpen(true);
+        return; 
+      }
+  
+      navigate(`/group/${groupId}`);
+
+    } catch {
+      addToast("그룹 정보 조회 중 오류가 발생했습니다.");
+    }
+  };
+  
+  
+  const handlePasswordSubmit = async (password) => {
+    try {
+      const response = await groupInteractionService.verifyGroupPassword(selectedGroupId, password);
+      
+      if (response.status === "success") {
+        addToast("비밀번호 확인 완료!");
+        setIsPasswordModalOpen(false);
+        window.location.href = `/group/${selectedGroupId}`;
+      } else {
+        addToast("비밀번호가 틀렸습니다.");
+      }
+    } catch {
+      addToast("비밀번호 검증 중 오류가 발생했습니다.");
+    }
+  };
+  
+  
   return (
     <div className="max-w-[95%] w-full h-full pt-3 pb-7">
       <div className="flex items-center mb-2">
@@ -122,14 +187,17 @@ export default function Group() {
                   days={group.dday}
                 />
               ) : (
-                <PrivateGroupCard
-                  id={group.groupId}
-                  key={group.groupId}
-                  title={group.groupName}
-                  days={group.dday}
-                  emotioncount={group.likeCount}
-                  picturecount={group.postCount}
-                />
+              <PrivateGroupCard
+                onClose={() => setIsPasswordModalOpen(false)}
+                id={group.groupId}
+                key={group.groupId}
+                title={group.groupName}
+                days={group.dday}
+                emotioncount={group.likeCount}
+                picturecount={group.postCount}
+                onClick={handlePrivateGroupClick}
+              />
+
               )
             )
           ) : (
@@ -148,7 +216,12 @@ export default function Group() {
           {isModalOpen && <CreateGroup onClose={() => setIsModalOpen(false)} />}
         </div>
       </div>
-
+      {isPasswordModalOpen && (
+        <PrivateGroupModal
+          onClose={() => setIsPasswordModalOpen(false)}
+          onSubmit={handlePasswordSubmit}
+        />
+      )}
       <div className="p-4">
         <Pagination
           currentPage={currentPage}
