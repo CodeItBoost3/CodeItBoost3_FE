@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 
+import userService from "@/services/user/userService";
 import defaultImage from '@/assets/icon/main/default-image.png';
 import groupService from '@/services/group/groupService';
+import groupInteractionService from "@/services/group/groupInteractionService";
 import postService from '@/services/post/postService';
 import SearchBar from "@/components/common/SearchBar";
 import SearchButton from "@/components/common/SearchButton";
@@ -32,6 +34,10 @@ export default function GroupDetail() {
   const [group, setGroup] = useState(null);
   const [publicMemories, setPublicMemories] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  // eslint-disable-next-line
+  const [myId, setMyId] = useState(null);
+  const [isMember, setIsMember] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const GROUP_PARAMS = 'group';
   const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
@@ -42,6 +48,31 @@ export default function GroupDetail() {
     { label: "배지 많은 순", value: "mostBadge" },
     { label: "공감순", value: "mostLiked" }
   ];
+
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const data = await userService.getUserInfo();
+        const userId = data.data.id;
+        setMyId(userId);
+        
+        if (group?.members) {
+          const member = group.members.find((member) => member.userId === userId);
+          if (member) {
+            setIsMember(true);
+            setIsAdmin(member.role === "ADMIN");
+          } else {
+            setIsMember(false);
+          }
+        }
+      } catch {
+        addToast("사용자 정보를 불러오는 중 오류가 발생했습니다.");
+      }
+    };
+  
+    fetchUserInfo();
+  }, [group]);
 
   useEffect(() => {
     const fetchGroupDetail = async () => {
@@ -147,6 +178,34 @@ export default function GroupDetail() {
     }
   };
 
+  const handleJoinGroup = async () => {
+    try {
+      await groupInteractionService.joinGroup(groupId);
+      addToast("그룹에 성공적으로 참여했습니다.");
+      
+      const updatedGroup = await groupService.getGroupDetail(groupId);
+      setGroup(updatedGroup);
+    } catch (error) {
+      addToast(error.message || "그룹 참여 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!window.confirm("정말 그룹을 떠나시겠습니까?")) return;
+  
+    try {
+      await groupInteractionService.leaveGroup(groupId);
+      addToast("그룹을 떠났습니다.");
+      setIsMember(false);
+  
+      const updatedGroup = await groupService.getGroupDetail(groupId);
+      setGroup(updatedGroup);
+    } catch (error) {
+      addToast(error.message || "그룹 떠나기 중 오류가 발생했습니다.");
+    }
+  };
+
+  
   return (
     <div className="w-full max-w-[1200px] mx-auto py-3">
       <div className="flex flex-col md:flex-row p-6 relative">
@@ -176,7 +235,21 @@ export default function GroupDetail() {
                 </div>
                 
               <div className="flex space-x-4 mt-3 md:mt-0">
-                <button className="px-5 py-2 whitespace-nowrap w-[110px] text-white bg-black hover:bg-black-hover active:bg-black-active rounded-lg">참여하기</button>
+              {isMember && !isAdmin ? (
+                <button 
+                  className="px-5 py-2 whitespace-nowrap w-[110px] text-white bg-normalGray hover:bg-normalGray-hover active:bg-normalGray-active rounded-lg"
+                  onClick={handleLeaveGroup}
+                >
+                  떠나기
+                </button>
+              ) : !isMember ? (
+                <button 
+                  className="px-5 py-2 whitespace-nowrap w-[110px] text-white bg-black hover:bg-black-hover active:bg-black-active rounded-lg"
+                  onClick={handleJoinGroup}
+                >
+                  참여하기
+                </button>
+              ) : null} 
                 <button className="flex items-center w-[150px] whitespace-nowrap px-5 py-2 bg-white hover:bg-background active:bg-darkWhite border rounded-lg">
                   <img src={LogoImage} alt="공감 아이콘" className="w-5 h-5 mr-2" />
                   공감 보내기
@@ -185,10 +258,10 @@ export default function GroupDetail() {
               </div>
             </div>
         </div>
-
+        {isAdmin && (
         <button className="absolute top-4 right-4" onClick={handleMoreClick}>
           <img src={MoreIcon} alt="더보기" />
-        </button>
+        </button>)}
       </div>
 
       {isModalOpen && <CreateMemory onClose={() => setIsModalOpen(false)} />}
