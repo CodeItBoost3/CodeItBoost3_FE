@@ -23,7 +23,7 @@ export default function MemoryPost() {
   const [showEditMemory, setShowEditMemory] = useState(false);
   const [post, setPost] = useState(null);
   const [comments] = useState("");
-  
+
   useEffect(() => {
     const fetchScrapStatus = async () => {
       try {

@@ -47,8 +47,11 @@ export const getCommentsByPost = async (postId) => {
 
 /** 댓글 수정 */
 export const updateComment = async (commentId, content) => {
-  const token = localStorage.getItem("accessToken");
+  if (!commentId) {
+    throw new Error("commentId가 제공되지 않았습니다.");
+  }
 
+  const token = localStorage.getItem("accessToken");
   if (!token) {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
@@ -56,10 +59,8 @@ export const updateComment = async (commentId, content) => {
   return axiosInstance
     .patch(
       `/api/comments/${commentId}`,
-      { content },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+      { content }, 
+
     )
     .then((response) => {
       if (response.data.status === "success") {
@@ -67,8 +68,13 @@ export const updateComment = async (commentId, content) => {
       } else {
         throw new Error(response.data.message || "댓글 수정 중 오류 발생");
       }
+    })
+    .catch((error) => {
+      console.error("댓글 수정 요청 실패:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || "댓글 수정 중 오류 발생");
     });
 };
+
 
 /** 댓글 삭제 */
 export const deleteComment = async (commentId) => {
