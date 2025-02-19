@@ -52,14 +52,12 @@ export default function CreateGroup({ onClose }) {
   
       const formData = new FormData();
       formData.append("name", groupName);
-      
+      formData.append("introduction", introduction);
+      formData.append("isPublic", isPublic.toString());
+  
       if (!isPublic) {
         formData.append("password", password);
       }
-  
-      formData.append("introduction", introduction);
-      formData.append("isPublic", isPublic.toString());
-      formData.append("userId", userId.toString());
   
       if (imageFile) {
         formData.append("groupImage", imageFile);
@@ -68,7 +66,6 @@ export default function CreateGroup({ onClose }) {
       await groupService.createGroup(formData);
       addToast("그룹이 성공적으로 생성되었습니다!");
       onClose();
-
     } catch (error) {
       console.error("그룹 생성 실패:", error);
       addToast(error.response?.data?.message || "그룹 생성 중 오류 발생");
