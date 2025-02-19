@@ -57,10 +57,9 @@ export const updateComment = async (commentId, content) => {
   }
 
   return axiosInstance
-    .patch(
+    .put(
       `/api/comments/${commentId}`,
       { content }, 
-
     )
     .then((response) => {
       if (response.data.status === "success") {
