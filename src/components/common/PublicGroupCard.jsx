@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
+import defaultImage from '@/assets/icon/main/default-image.png';
 import lock from "@/assets/icon/main/lock-open.svg";
 import picture from "@/assets/icon/main/picture.svg";
 import badge from "@/assets/icon/main/badge.svg";
@@ -17,7 +18,7 @@ export default function PublicGroupCard({ id, image, days, title, description, p
         <div className="relative w-full p-5 h-[30vh]">
           <img
             className=" rounded-md w-full h-full object-cover"
-            src={image}
+            src={image || defaultImage}
             alt="그룹 이미지"
           />
         </div>
