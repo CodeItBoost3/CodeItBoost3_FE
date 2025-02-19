@@ -1,6 +1,6 @@
 import axiosInstance from "@/services/axiosInstance";
 
-/** 게시글 공감 (좋아요) 추가/취소 */
+/** 게시글 공감 (좋아요) 추가 */
 export const likePost = async (postId) => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
@@ -13,7 +13,6 @@ export const likePost = async (postId) => {
     })
     .then((response) => response.data)
     .catch((error) => {
-      console.error("게시글 공감 오류:", error);
       throw new Error(error.response?.data?.message || "게시글 공감 중 오류 발생");
     });
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/useToast";
+import { motion, AnimatePresence } from "framer-motion";
 
 import postService from "@/services/post/postService";
 import scrapService from "@/services/scrap/scrapService";
@@ -12,14 +13,16 @@ import EditMemory from "@/components/modal/EditMemory";
 
 import empathyIcon from "@/assets/image/logo-image.svg";
 import commentIcon from "@/assets/icon/group/comment.svg";
+import LogoImage from "@/assets/image/logo-image.svg";
 import moreIcon from "@/assets/icon/group/more.svg";
 import ScrapIcon from "@/assets/icon/group/bookmark-fill.svg?react";
-import postInteractionService from "../services/post/postInteractionService";
+import postInteractionService from "@/services/post/postInteractionService";
 
 export default function MemoryPost() {
   const { groupId, postId } = useParams();
   const addToast = useToast();
   const navigate = useNavigate();
+  const [floatingIcons, setFloatingIcons] = useState([]);
   const [isBookmark, setIsBookmark] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
@@ -64,6 +67,28 @@ export default function MemoryPost() {
     setIsMoreOpen(true);
     setMorePosition({ x: event.clientX, y: event.clientY });
   };
+
+  const handleLikePost = async () => {
+    try {
+      await postInteractionService.likePost(postId);
+      setPost((prevPost) => ({
+        ...prevPost,
+        likeCount: prevPost.likeCount + 1,
+      }));
+      addToast("게시글에 공감했습니다!");
+      setFloatingIcons((prev) => [
+        ...prev,
+        { id: Date.now(), x: Math.random() * (30 - 25) + 25 }
+      ]);
+  
+      setTimeout(() => {
+        setFloatingIcons((prev) => prev.slice(1));
+      }, 1500);
+    } catch {
+      addToast("공감 추가 중 오류가 발생했습니다.");
+    }
+  };
+  
 
   const handleCloseMore = () => {
     setIsMoreOpen(false);
@@ -133,7 +158,6 @@ export default function MemoryPost() {
             <img src={moreIcon} alt="더보기" className="w-6 h-6" onClick={handleMoreClick} />
           </button>
         </div>
-
         {isMoreOpen &&
           <MoreOptionsModal 
              position={{ x: morePosition.x - 40, y: morePosition.y }} 
@@ -151,7 +175,8 @@ export default function MemoryPost() {
         )}
       </div>
 
-      <div className="mt-4 flex items-center text-darkGray-active text-sm">
+      <div className="mt-4 flex justify-between items-center text-darkGray-active text-sm">
+        <div className="flex justify-between">
         <div className="flex space-x-2">
           <span className="flex gap-1">
             <MapPinIcon className="w-5 h-5 text-gray-500" />
@@ -175,7 +200,27 @@ export default function MemoryPost() {
           </div>
         </div>
       </div>
+      <AnimatePresence>
+    {floatingIcons.map((icon) => (
+      <motion.img
+        key={icon.id}
+        src={LogoImage}
+        alt="공감 아이콘"
+        className="absolute w-5 h-5"
+        initial={{ opacity: 1, y: 0, scale: 1 }}
+        animate={{ opacity: 0, y: -60, scale: 1.2 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1 }}
+        style={{ left: `${50 + icon.x}%`, transform: "translateX(-50%)" }}
+      />
+    ))}
+  </AnimatePresence>
+      <button onClick={handleLikePost}  className="flex items-center w-[150px] whitespace-nowrap pl-5 pr-4 py-2 bg-white hover:bg-background active:bg-darkWhite border rounded-lg">
+      <img src={LogoImage} alt="공감 아이콘" className="w-5 h-5 mr-2" />
+            공감 보내기
+       </button>
 
+      </div>
       <div className="mb-[70px] mt-10 border-t border-darkWhite"></div>
             
       <img 
