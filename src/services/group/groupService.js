@@ -88,7 +88,7 @@ export const updateGroup = async (groupId, updatedData) => {
   }
 
   return axiosInstance
-    .put(`/api/groups/${groupId}`, updatedData, {
+    .patch(`/api/groups/${groupId}`, updatedData, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((response) => response.data);

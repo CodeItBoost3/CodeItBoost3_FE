@@ -63,7 +63,12 @@ export default function CreateGroup({ onClose }) {
         formData.append("groupImage", imageFile);
       }
   
-      await groupService.createGroup(formData);
+      await groupService.createGroup(formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", 
+        },
+      });
+  
       addToast("그룹이 성공적으로 생성되었습니다!");
       onClose();
     } catch (error) {
@@ -71,6 +76,7 @@ export default function CreateGroup({ onClose }) {
       addToast(error.response?.data?.message || "그룹 생성 중 오류 발생");
     }
   };
+  
   
 
   return (

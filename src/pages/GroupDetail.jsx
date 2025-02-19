@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/useToast";
-import { useSearchParams, useParams } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 
 import defaultImage from '@/assets/icon/main/default-image.png';
 import groupService from '@/services/group/groupService';
@@ -20,6 +20,7 @@ import MoreIcon from "@/assets/icon/group/more.svg";
 export default function GroupDetail() {
   const { groupId } = useParams();
   const addToast = useToast();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
@@ -66,8 +67,6 @@ export default function GroupDetail() {
           keyword: searchTerm,
           isPublic: tabName === "Public",
         });
-    
-        console.log("📢 조회된 게시글 목록:", postList);
     
         if (postList.status === "success" && postList.data) {
           setTotalPages(postList.data.totalPages);
@@ -138,6 +137,16 @@ export default function GroupDetail() {
     setIsMoreOpen(false);
   };
 
+  const handleDeleteGroup = async (groupId) => {
+    try {
+      await groupService.deleteGroup(groupId);
+      addToast("그룹이 삭제되었습니다.");
+      navigate(`/group`); 
+    } catch {
+      console.log("게시글 삭제에 실패했습니다.");
+    }
+  };
+
   return (
     <div className="w-full max-w-[1200px] mx-auto py-3">
       <div className="flex flex-col md:flex-row p-6 relative">
@@ -183,8 +192,8 @@ export default function GroupDetail() {
       </div>
 
       {isModalOpen && <CreateMemory onClose={() => setIsModalOpen(false)} />}
-      {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} onEdit={() => setShowEditGroup(true)} />}
-      {showEditGroup && <EditGroup onClose={() => setShowEditGroup(false)} />}
+      {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} itemId={group.groupId} onEdit={() => setShowEditGroup(true)} onDelete={handleDeleteGroup}/>}
+      {showEditGroup && <EditGroup onUpdate={(updatedGroup) => setGroup(updatedGroup)} onClose={() => setShowEditGroup(false)} />}
         
       <div className="my-[70px] border-t border-gray-200"></div>
 
