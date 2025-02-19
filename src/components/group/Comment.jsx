@@ -10,28 +10,35 @@ import DeleteIcon from "@/assets/icon/group/comment-delete.svg";
 import defaultComment from "@/assets/icon/group/no-comment.svg";
 
 
-function Comment({ comment, onEdit, onDelete, myId }) {
+function Comment({ comment, onEdit, onDelete, onLike, myId }) {
   return (
     <div className="flex items-start space-x-3 py-3 border-t border-gray-200">
       <img src={comment.profile || userProfile} alt="프로필" className="w-8 h-8 rounded-full" />
       <div className="flex-1">
         <span className="text-sm font-semibold">{comment.nickname}</span>
         <p className="text-gray-800 text-sm mt-1">{comment.content}</p>
+
+        <div className="flex items-center gap-2 mt-2">
+          <button onClick={() => onLike(comment.commentId)} className="text-darkGray hover:text-darkViolet transition">
+            {comment.isLiked ? "💜" : "🤍"} {comment.likeCount || 0}
+          </button>
+        </div>
       </div>
+
       <div className="flex flex-col gap-2 items-end justify-between">
         <span className="text-xs text-darkGray-active">
           {new Date(comment.createdAt).toLocaleDateString("ko-KR")} 
         </span>
-        {comment.userId === myId &&(
-        <div className="flex gap-2 mt-1">
-          <img src={EditIcon} alt="수정" className="w-4 h-4 cursor-pointer" onClick={() => onEdit(comment)} />
-          <img src={DeleteIcon} alt="삭제" className="w-4 h-4 cursor-pointer" onClick={() => onDelete(comment.commentId)} />
-        </div>)}
+        {comment.userId === myId && (
+          <div className="flex gap-2 mt-1">
+            <img src={EditIcon} alt="수정" className="w-4 h-4 cursor-pointer" onClick={() => onEdit(comment)} />
+            <img src={DeleteIcon} alt="삭제" className="w-4 h-4 cursor-pointer" onClick={() => onDelete(comment.commentId)} />
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
 
 export default function CommentSection({ postId }) {
   const addToast = useToast();
@@ -120,6 +127,30 @@ const handleKeyDown = (e) => {
     }
   };
 
+  const handleCommentLike = async (commentId) => {
+    try {
+      const response = await commentService.likeComment(commentId);
+  
+      const { liked, likeCount } = response.data;
+  
+      setComments((prevComments) =>
+        prevComments.map((c) =>
+          c.commentId === commentId ? { ...c, likeCount, isLiked: liked } : c
+        )
+      );
+  
+      if (liked) {
+        addToast("좋아요가 추가되었습니다! 💜");
+      } else {
+        addToast("좋아요가 취소되었습니다. 💔");
+      }
+    } catch (error) {
+      addToast("좋아요 요청 중 오류가 발생했습니다.");
+      console.error("좋아요 요청 오류:", error);
+    }
+  };
+  
+  
   return (
     <div className="w-full max-w-[900px] mx-auto mt-6">
 
@@ -146,7 +177,7 @@ const handleKeyDown = (e) => {
           </div>
         ) : (
           comments.map((comment) => ( 
-            <Comment key={comment.commentId} comment={comment} onEdit={handleCommentEdit} onDelete={handleCommentDelete} myId={myId} />
+            <Comment key={comment.commentId} comment={comment} onEdit={handleCommentEdit} onDelete={handleCommentDelete} onLike={handleCommentLike} myId={myId} />
           ))
         )}
       </div>
