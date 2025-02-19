@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import postService from "@/services/post/postService";
-
+import scrapService from "@/services/scrap/scrapService";
 import defaultImage from '@/assets/icon/main/default-image.png';
 import { MapPinIcon, CalendarIcon } from "@heroicons/react/24/solid";
 import CommentSection from "@/components/group/Comment.jsx";
@@ -13,6 +13,7 @@ import empathyIcon from "@/assets/image/logo-image.svg";
 import commentIcon from "@/assets/icon/group/comment.svg";
 import moreIcon from "@/assets/icon/group/more.svg";
 import ScrapIcon from "@/assets/icon/group/bookmark-fill.svg?react";
+import postInteractionService from "../services/post/postInteractionService";
 
 export default function MemoryPost() {
   const { postId } = useParams();
@@ -22,6 +23,21 @@ export default function MemoryPost() {
   const [showEditMemory, setShowEditMemory] = useState(false);
   const [post, setPost] = useState(null);
   const [comments] = useState("");
+  
+  useEffect(() => {
+    const fetchScrapStatus = async () => {
+      try {
+        const response = await scrapService.checkScrapStatus(postId);
+        setIsBookmark(response.data.isScrapped);
+      } catch (error) {
+        console.error("스크랩 여부 조회 실패:", error);
+      }
+    };
+  
+    if (postId) {
+      fetchScrapStatus();
+    }
+  }, [postId]);
   
   useEffect(() => {
     const fetchPostDetail = async () => {
@@ -50,13 +66,23 @@ export default function MemoryPost() {
     setIsMoreOpen(false);
   };
 
-  const handleBookMark = () => {
-    // id값으로 api 요청로직 추가해야 함.
-    setIsBookmark(!isBookmark);
-  }
+  const handleBookMark = async () => {
+    try {
+      const response = await postInteractionService.toggleScrap(postId);
+      
+      if (response.status === "success") {
+        if (response.message === "스크랩이 완료되었습니다.") {
+          setIsBookmark(true);
+        } else if (response.message === "스크랩이 취소되었습니다.") {
+          setIsBookmark(false);
+        }
+      }
+    } catch (error) {
+      console.error("북마크 추가/삭제 실패:", error);
+    }
+  };
 
   const iconStyle = "size-7 cursor-pointer";
-
 
   if (!post) {
     return <div className="text-center text-darkGray">게시글이 존재하지 않습니다.</div>;
