@@ -14,54 +14,6 @@ import CreateGroup from "@/components/modal/CreateGroup";
 import NoArticleIcon from "@/assets/icon/main/edit.svg";
 import NoGroupImg from "@/assets/icon/group/no-group.svg";
 
-// const groupData = [
-//   {
-//     id: 1,
-//     title: "그룹 1",
-//     description: "설명 1",
-//     image: image,
-//     picturecount: "5",
-//     emotioncount: "3",
-//     badgecount: "5",
-//     days: "D+251"
-//   },
-//   {
-//     id: 2,
-//     title: "그룹 2",
-//     description: "설명 2",
-//     image: image,
-//     picturecount: "5",
-//     emotioncount: "3",
-//     badgecount: "5",
-//     days: "D+251"
-//   },
-//   {
-//     id: 3,
-//     title: "그룹 3",
-//     description: "설명 3",
-//     image: image,
-//     picturecount: "5",
-//     emotioncount: "3",
-//     badgecount: "5",
-//     days: "D+251"
-//   },
-//   {
-//     id: 4,
-//     title: "그룹 4",
-//     description: "설명 4",
-//     image: image,
-//     picturecount: "5",
-//     emotioncount: "3",
-//     badgecount: "5",
-//     days: "D+251"
-//   },
-// ];
-
-const memoryData = [
-  // { id: 1, title: "글 제목 1", date: "2025.01.21", memory: "8", sympathy: "5", comments: "5" },
-  // { id: 2, title: "글 제목 2", date: "2025.01.20", memory: "12", sympathy: "7", comments: "9" },
-];
-
 export default function Main() {
   const [isLogin, setIsLogin] = useState(false);
   const [recentPosts, setRecentPosts] = useState([]);
@@ -120,13 +72,10 @@ export default function Main() {
     fetchRecentPosts();
   }, [])
 
-
-  console.log(recentPosts);
   const handleLoginModal = (type) => {
     switch (type) {
-      case "login":
-        break;
       case "register":
+        navigate("/login");
         break;
       case "guest":
         setIsLoginModalOpen(false);
@@ -204,24 +153,25 @@ export default function Main() {
             </div>
             {/* 섹션 1 카드 */}
             <div className="h-auto w-full bg-white rounded-[17.33px] p-4 shadow-md flex flex-col gap-5">
-              {memoryData?.map((item, idx) => (
-                  <MemoryCard
-                      key={item.id}
-                      index={idx}
-                      title={item.title}
-                      date={item.date}
-                      memory={item.memory}
-                      sympathy={item.sympathy}
-                      comments={item.comments}
-                  />
-              ))}
-              {memoryData.length === 0 &&
+              {recentPosts.length > 0 ? (
+                  recentPosts.map((item, idx) => (
+                      <MemoryCard
+                          key={item.id}
+                          index={idx}
+                          title={item.title}
+                          date={item.date}
+                          memory={item.memory}
+                          sympathy={item.sympathy}
+                          comments={item.comments}
+                      />
+                  ))
+              ) : (
                   <div className="flex flex-col items-center justify-center h-[30vh] text-center text-gray-500">
                     <img src={NoArticleIcon} alt="No Group" className="w-30 h-30 mb-8"/>
                     <p className="text-xl font-semibold">최근에 내가 작성한 추억글이 없습니다.</p>
                     <p className="text-sm text-gray-400 mt-1">조각집에 참여하고 추억글을 작성해보세요!</p>
                   </div>
-              }
+              )}
             </div>
           </div>
           {/* 섹션 2 */}

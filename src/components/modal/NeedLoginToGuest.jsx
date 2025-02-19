@@ -25,17 +25,10 @@ export default function NeedLoginToGuest({onClick}) {
               <div className="w-full gap-1 mt-3">
                 <button
                     type="button"
-                    onClick={() => onClick("login")}
-                    className="flex w-full items-center justify-center gap-2 rounded-md bg-lightViolet hover:bg-lightViolet-hover active:bg-lightViolet-active py-2.5 text-sm font-medium tracking-tight text-black"
-                >
-                  로그인
-                </button>
-                <button
-                    type="button"
                     onClick={() => onClick("register")}
                     className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-darkViolet hover:bg-darkViolet-hover active:bg-darkViolet-active py-2.5 text-sm font-medium tracking-tight text-white"
                 >
-                  회원가입
+                  로그인/회원가입 하러가기
                 </button>
                 <p className="text-black font-medium text-center mt-5 cursor-pointer" onClick={() => onClick("guest")}>로그인 없이 둘러보기</p>
               </div>
