@@ -87,6 +87,10 @@ export default function Main() {
     !isLogin ? setIsLoginModalOpen(true) : setIsGroupMakeModalOpen(true)
   }
 
+  const handleRecentNotice = () => {
+    navigate("/notice/20")
+  }
+
   return (
       <div className="w-full h-full pt-3 pb-7 overflow-auto">
         <div className="flex items-center mb-1">
@@ -97,7 +101,7 @@ export default function Main() {
         님, 안녕하세요!
         </span>
         </div>
-        <NoticeCard/>
+        <NoticeCard onClick={handleRecentNotice}/>
         <div className="max-w-[95%] flex flex-col gap-3 my-3">
           <div className="flex justify-between items-center">
           <span className="text-black text-xl font-semibold">

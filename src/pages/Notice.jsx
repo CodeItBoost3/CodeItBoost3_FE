@@ -34,13 +34,13 @@ const noticeData = [
   },
   {
     id: 15,
-    title: "보안 강화 업데이트 안내",
+    title: "웹 서비스 보안 업데이트 안내",
     createdAt: "2025-01-26",
     view: 77,
   },
   {
     id: 16,
-    title: "설 연휴 배송 일정 안내",
+    title: "설 연휴 시스템 점검 안내",
     createdAt: "2025-01-25",
     view: 85,
   },
@@ -58,13 +58,13 @@ const noticeData = [
   },
   {
     id: 19,
-    title: "앱 다운로드 10만 돌파 이벤트",
+    title: "사이트 방문 10만 돌파 이벤트",
     createdAt: "2025-01-22",
     view: 100,
   },
   {
     id: 20,
-    title: "이용 후기 작성 이벤트 안내",
+    title: "조각집 사용법 보러가기",
     createdAt: "2025-01-21",
     view: 45,
   }
