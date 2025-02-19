@@ -1,6 +1,6 @@
 import LogoImage from "@/assets/image/logo-image.svg";
 
-export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0" }) {
+export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0" , onClickGroup, onClickArticle}) {
   return (
     <div className={`${widthClass} ${marginTop} h-auto px-3 py-6 bg-[#f4dffb]/20 rounded-lg border border-normalGray flex flex-col justify-between`}>
       <div className="self-stretch flex flex-col gap-2">
@@ -15,12 +15,12 @@ export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0
         </div>
       </div>
       <div className="flex flex-col gap-3 w-full">
-        <div className="bg-white rounded-md p-3 shadow-sm">
+        <div className="bg-white rounded-md p-3 shadow-sm" onClick={onClickGroup}>
           <span className="text-black text-sm font-normal">
             새로운 <span className="text-darkViolet">조각 그룹</span> 등록하기
           </span>
         </div>
-        <div className="bg-white rounded-md p-3 shadow-sm">
+        <div className="bg-white rounded-md p-3 shadow-sm" onClick={onClickArticle}>
           <span className="text-[#2a2a2a] text-sm font-normal">
             새로운 <span className="text-darkViolet">추억</span> 기록하기
           </span>

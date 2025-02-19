@@ -87,7 +87,7 @@ export const getMyPosts = async (page = 1, limit = 5) => {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
-  return axiosInstance.get(`/users/posts?page=${page}&limit=${limit}`, {
+  return axiosInstance.get(`/users/me/posts?page=${page}&limit=${limit}`, {
     headers: { Authorization: `Bearer ${token}` },
   }).then(response => response.data);
 };
@@ -99,7 +99,7 @@ export const getMyComments = async (page = 1, limit = 5) => {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
-  return axiosInstance.get(`/users/comments?page=${page}&limit=${limit}`, {
+  return axiosInstance.get(`/users/me/comments?page=${page}&limit=${limit}`, {
     headers: { Authorization: `Bearer ${token}` },
   }).then(response => response.data);
 };
