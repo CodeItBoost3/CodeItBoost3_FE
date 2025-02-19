@@ -91,14 +91,14 @@ export default function Main() {
   /** 그룹 목록 조회 **/
   useEffect(() => {
     const fetchGroupList = async () => {
-      try{
+      try {
         const data = await groupService.getGroupList({
           type: "public",
           sortBy: "latest",
-          keyword:"",
+          keyword: "",
         });
         setGroupList(data.data || []);
-      } catch{
+      } catch {
         addToast("그룹 목록 조회에 실패했습니다.");
       }
     };
@@ -109,10 +109,10 @@ export default function Main() {
   /** 내가 작성한 글 목록 조회 **/
   useEffect(() => {
     const fetchRecentPosts = async () => {
-      try{
+      try {
         const data = await userService.getMyPosts();
         setRecentPosts(data.data || []);
-      } catch{
+      } catch {
         addToast("최근에 작성한 글 조회에 실패했습니다.");
       }
     }
@@ -158,24 +158,24 @@ export default function Main() {
                   className="cursor-pointer text-normalGray hover:text-normalGray-hover active:text-normalGray-active text-lg">공개 그룹 목록 보러가기</span>
           </div>
           <div className=" w-full py-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {groupList.map((group) => (
-                  <PublicGroupCard
-                      key={group.groupId}
-                      id={group.groupId}
-                      title={group.groupName}
-                      description={group.description}
-                      image={group.image}
-                      picturecount={group.postCount}
-                      emotioncount={group.likeCount}
-                      badgecount={group.badgecount}
-                      days={group.dday}
-                  />
-              ))}
-
-            </div>
-            {groupList.length === 0 && (
-                <div className="w-full min-h-[45vh] h-auto flex justify-center items-center bg-white rounded-[18.51px] shadow-[2.3px_4.6px_13px_0px_rgba(0,0,0,0.08)] border border-darkWhite">
+            {groupList.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {groupList.map((group) => (
+                      <PublicGroupCard
+                          key={group.groupId}
+                          id={group.groupId}
+                          title={group.groupName}
+                          description={group.description}
+                          image={group.image}
+                          picturecount={group.postCount}
+                          emotioncount={group.likeCount}
+                          badgecount={group.badgecount}
+                          days={group.dday}
+                      />
+                  ))}
+                </div>) : (
+                <div
+                    className="w-full min-h-[45vh] h-auto flex justify-center items-center bg-white rounded-[18.51px] shadow-[2.3px_4.6px_13px_0px_rgba(0,0,0,0.08)] border border-darkWhite">
                   <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
                     <img src={NoGroupImg} alt="No Group" className="w-30 h-30 mb-4"/>
                     <p className="text-lg font-semibold">등록된 그룹이 없습니다.</p>
@@ -227,7 +227,7 @@ export default function Main() {
           {/* 섹션 2 */}
           <MemoryActions widthClass="flex-1" marginTop="mt-[7vh]" onClickGroup={handleGroupRegist}/>
         </div>
-        {isGroupMakeModalOpen && <CreateGroup onClose={() => setIsGroupMakeModalOpen(false)} />}
+        {isGroupMakeModalOpen && <CreateGroup onClose={() => setIsGroupMakeModalOpen(false)}/>}
         {isLoginModalOpen && <NeedLoginToGuest onClick={handleLoginModal}/>}
       </div>
   );
