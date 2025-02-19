@@ -7,15 +7,41 @@ export const createGroup = async (formData) => {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
+  // API 문서에 맞게 JSON 데이터를 FormData에 추가
+  const payload = {
+    name: formData.get("name"),
+    introduction: formData.get("introduction"),
+    isPublic: formData.get("isPublic") === "true", // 문자열을 boolean으로 변환
+  };
+
+  if (formData.get("password")) {
+    payload.password = formData.get("password");
+  }
+
+  const finalFormData = new FormData();
+  finalFormData.append("data", JSON.stringify(payload));
+
+  // 이미지 파일 추가 (선택 사항)
+  if (formData.get("groupImage")) {
+    finalFormData.append("groupImage", formData.get("groupImage"));
+  }
+
   return axiosInstance
-    .post(`/api/groups`, formData, {
+    .post(`/api/groups`, finalFormData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
+        // ❌ `finalFormData.getHeaders()` 제거
+        // Axios가 자동으로 `Content-Type`을 설정하므로 필요 없음
       },
     })
-    .then((response) => response.data);
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error("그룹 생성 실패:", error);
+      throw error;
+    });
 };
+
+
 
 /** 그룹 목록 조회 */
 export const getGroupList = async ({ type = "", sortBy = "", keyword = "", page = 1 }) => {
