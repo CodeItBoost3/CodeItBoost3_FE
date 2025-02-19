@@ -1,6 +1,12 @@
 import { useEffect, useRef } from "react";
 
-export default function MoreOptionsModal({ position, onClose, onEdit }) {
+export default function MoreOptionsModal({ 
+  position, 
+  onClose, 
+  onEdit, 
+  onDelete, 
+  itemId,
+}) {
   const modalRef = useRef(null);
 
   useEffect(() => {
@@ -14,6 +20,11 @@ export default function MoreOptionsModal({ position, onClose, onEdit }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
+  const handleDelete = () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    onDelete(itemId); // ✅ 삭제 로직을 외부에서 처리하도록 변경
+  };
+
   return (
     <div
       ref={modalRef}
@@ -23,7 +34,7 @@ export default function MoreOptionsModal({ position, onClose, onEdit }) {
       <button
         className="w-full text-left px-3 py-2 text-sm text-black hover:bg-gray-200 rounded-md"
         onClick={() => {
-          onEdit(); 
+          onEdit();
           onClose();
         }}
       >
@@ -31,7 +42,7 @@ export default function MoreOptionsModal({ position, onClose, onEdit }) {
       </button>
       <button
         className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-100 rounded-md"
-        onClick={onClose}
+        onClick={handleDelete}
       >
         삭제하기
       </button>

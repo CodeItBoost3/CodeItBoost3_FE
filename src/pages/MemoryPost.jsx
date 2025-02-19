@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/useToast";
 
 import postService from "@/services/post/postService";
@@ -17,8 +17,9 @@ import ScrapIcon from "@/assets/icon/group/bookmark-fill.svg?react";
 import postInteractionService from "../services/post/postInteractionService";
 
 export default function MemoryPost() {
-  const { postId } = useParams();
+  const { groupId, postId } = useParams();
   const addToast = useToast();
+  const navigate = useNavigate();
   const [isBookmark, setIsBookmark] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [morePosition, setMorePosition] = useState({ x: 0, y: 0 });
@@ -84,6 +85,16 @@ export default function MemoryPost() {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    try {
+      await postService.deletePost(postId);
+      addToast("게시글이 삭제되었습니다.");
+      navigate(`/group/${groupId}`); 
+    } catch {
+      addToast("게시글 삭제에 실패했습니다.");
+    }
+  };
+
   const iconStyle = "size-7 cursor-pointer";
 
   if (!post) {
@@ -123,7 +134,14 @@ export default function MemoryPost() {
           </button>
         </div>
 
-        {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} onEdit={() => setShowEditMemory(true)} />}
+        {isMoreOpen &&
+          <MoreOptionsModal 
+             position={{ x: morePosition.x - 40, y: morePosition.y }} 
+             onClose={handleCloseMore}
+             onEdit={() => setShowEditMemory(true)}
+             onDelete={handleDeletePost}
+             itemId={post.postId}
+          />}
         {showEditMemory && (
           <EditMemory 
             post={post}

@@ -73,16 +73,16 @@ export const updatePost = async (postId, formData) => {
 /** 게시글 삭제 */
 export const deletePost = async (postId) => {
   const token = localStorage.getItem("accessToken");
+
   if (!token) {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
-  return axiosInstance
-    .delete(`/api/posts/${postId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((response) => response.data);
+  return axiosInstance.delete(`/api/posts/${postId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(response => response.data);
 };
+
 
 const postService = {
   createPost,
