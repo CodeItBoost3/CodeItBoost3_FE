@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
+
 import { FaTrash, FaTimes } from "react-icons/fa";
 import postService from "@/services/post/postService";
 import { useToast } from "@/hooks/useToast";
 
-export default function CreateMemory({ groupId, onClose }) {
-  const [isPublic, setIsPublic] = useState(true);
+export default function CreateMemory({ onClose }) {
+  const { groupId } = useParams();
   const [previewImage, setPreviewImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const addToast = useToast();
@@ -85,7 +87,6 @@ const handleCreatePost = async () => {
       content: formData.content,
       location: formData.location,
       moment: formData.memoryDate,
-      isPublic: isPublic,
       tag: formData.tags,
       imageFile: imageFile,
     };
@@ -219,18 +220,6 @@ const handleCreatePost = async () => {
                   onChange={handleChange}
                   className="focus:outline-normalViolet w-[136.26px] h-[28.31px] px-[10.53px] py-[9.87px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
                 />
-              </div>
-              <div className="flex-col items-center space-y-3">
-              <label className="text-black text-[13.17px] font-medium">
-                  추억 공개 선택
-                </label>
-                <div className="flex items-center gap-3">
-                <span className="text-xs">공개</span>
-                <div className={`relative w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${isPublic ? "bg-darkViolet" : "bg-darkGray-hover"}`} onClick={() => setIsPublic(!isPublic)}>
-
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-md transform ${isPublic ? "translate-x-6" : "translate-x-0"} transition-transform`} />
-                  </div>
-                  </div>
               </div>
 
             </div>

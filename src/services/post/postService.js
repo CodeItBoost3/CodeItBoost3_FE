@@ -11,39 +11,41 @@ export const createPost = async (groupId, postData) => {
   formData.append("title", postData.title);
   formData.append("content", postData.content);
   formData.append("location", postData.location);
-  formData.append("moment", postData.moment);
-  formData.append("isPublic", postData.isPublic);
+  formData.append("moment", postData.moment);  
 
-  postData.tag.forEach((tag) => formData.append("tag", tag));
+  formData.append("tag", JSON.stringify(postData.tag));
 
   if (postData.imageFile) {
-    formData.append("imageFile", postData.imageFile);
+    formData.append("image", postData.imageFile);
   }
-  return axiosInstance
-    .post(`/api/groups/1/posts`, formData, {
+
+  try {
+    const response = await axiosInstance.post(`/api/groups/${groupId}/posts`, formData, {
       headers: { 
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data"
       },
-    })
-    .then((response) => response.data);
-};
+    });
 
+    return response.data;
+  } catch (error) {
+    console.error("게시글 작성 실패:", error);
+
+    if (error.response) {
+      const errorMsg = error.response.data?.message || "게시글 작성 중 오류가 발생했습니다.";
+      throw new Error(errorMsg);
+    } else {
+      throw new Error("서버와의 연결이 원활하지 않습니다.");
+    }
+  }
+};
 
 /** 게시글 목록 조회 */
-export const getPostList = async ({ groupId, page = 1, pageSize = 10, sortBy = "latest", keyword = "", isPublic = null }) => {
-  return axiosInstance
-    .get(`/api/groups/${groupId}/posts`, {
-      params: {
-        page,
-        pageSize,
-        sortBy,
-        keyword,
-        isPublic,
-      },
-    })
-    .then((response) => response.data);
-};
+export const getPostList = async ({ groupId, page = 1, pageSize = 10, sortBy = "latest", keyword = "" }) => 
+  axiosInstance.get(`/api/groups/${groupId}/posts`, {
+    params: { page, pageSize, sortBy, keyword },
+  }).then(response => response.data);
+
 
 /** 게시글 상세 조회 */
 export const getPostDetail = async (postId) => {

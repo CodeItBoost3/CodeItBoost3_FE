@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams } from 'react-router-dom';
 
+import defaultImage from '@/assets/icon/main/default-image.png';
 import groupService from '@/services/group/groupService';
+import postService from '@/services/post/postService';
 import SearchBar from "@/components/common/SearchBar";
 import SearchButton from "@/components/common/SearchButton";
 import Select from '@/components/common/Select';
 import PublicPostCard from '@/components/group/PublicPostCard';
-import PrivatePostCard from '@/components/group/PrivatePostCard';
 import Pagination from "@/components/common/Pagination";
 import CreateMemory from "@/components/modal/CreateMemory";
 import MoreOptionsModal from "@/components/modal/MoreOptionsModal";
 import EditGroup from "@/components/modal/EditGroup";
-
 import AddIcon from "@/assets/icon/group/add-memory.svg";
 import LogoImage from "@/assets/image/logo-image.svg";
 import MoreIcon from "@/assets/icon/group/more.svg";
@@ -30,9 +30,8 @@ export default function GroupDetail() {
   const [showEditGroup, setShowEditGroup] = useState(false);
   const [group, setGroup] = useState(null);
   const [publicMemories, setPublicMemories] = useState([]);
-  const [privateMemories, setPrivateMemories] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const totalPages = 10;
   const GROUP_PARAMS = 'group';
   const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
 
@@ -47,48 +46,63 @@ export default function GroupDetail() {
     const fetchGroupDetail = async () => {
       try {
         const data = await groupService.getGroupDetail(groupId);
-
         if (!data) {
           addToast("해당 그룹을 찾을 수 없습니다.");
           return;
         }
-
         setGroup(data);
-        
-        setPublicMemories(
-          data.publicPosts
-            ? data.publicPosts.map(post => ({
-                author: post.author?.nickname || "알 수 없음",
-                visibility: "공개",
-                title: post.title || "제목 없음",
-                location: data.groupName || "알 수 없음",
-                date: post.createdAt ? new Date(post.createdAt).toLocaleDateString("ko-KR") : "날짜 없음",
-                tags: post.tags || [],
-                likes: post.likeCount || 0,
-                comments: post.commentCount || 0,
-              }))
-            : []
-        );
-
-        setPrivateMemories(
-          data.privatePosts
-            ? data.privatePosts.map(post => ({
-                author: post.author?.nickname || "알 수 없음",
-                visibility: "비공개",
-                title: post.title || "제목 없음",
-                date: post.createdAt ? new Date(post.createdAt).toLocaleDateString("ko-KR") : "날짜 없음",
-                likes: post.likeCount || 0,
-                comments: post.commentCount || 0,
-              }))
-            : []
-        );
       } catch {
         addToast("그룹 상세 조회에 실패했습니다.");
       }
     };
-
-    if (groupId) fetchGroupDetail();
-  }, [groupId]);
+  
+    const fetchPosts = async () => {
+      try {
+        const postList = await postService.getPostList({
+          groupId,
+          page: currentPage,
+          pageSize: 10,
+          sortBy,
+          keyword: searchTerm,
+          isPublic: tabName === "Public",
+        });
+    
+        console.log("📢 조회된 게시글 목록:", postList);
+    
+        if (postList.status === "success" && postList.data) {
+          setTotalPages(postList.data.totalPages);
+    
+          setPublicMemories(
+            postList.data.data.map((post) => ({
+              id: post.postId,
+              groupId: post.groupId,
+              author: post.author?.nickname || "알 수 없음",
+              title: post.title || "제목 없음",
+              content: post.content || "내용 없음",
+              imageUrl: post.imageUrl ? `https://${post.imageUrl}` : null,
+              location: post.location || "장소 정보 없음",
+              moment: new Date(post.moment).toLocaleDateString("ko-KR"),
+              createdAt: new Date(post.createdAt).toLocaleDateString("ko-KR"),
+              likeCount: post.likeCount ?? 0,
+              commentCount: post.commentCount ?? 0,
+              tag: post.tag?.length ? post.tag : ["태그 없음"],
+            }))
+          );
+        } else {
+          setPublicMemories([]);
+        }
+      } catch {
+        addToast("게시글 목록 조회에 실패했습니다.");
+      }
+    };
+    
+  
+    if (groupId) {
+      fetchGroupDetail();
+      fetchPosts();
+    }
+  }, [groupId, currentPage, sortBy, searchTerm, tabName]);
+  
 
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
@@ -129,7 +143,7 @@ export default function GroupDetail() {
       <div className="flex flex-col md:flex-row p-6 relative">
         <img 
           className="w-[180px] h-[180px] rounded-lg object-cover"
-          src={group?.imageUrl ? `https://${group.imageUrl}` : "https://placehold.co/180x180"} 
+          src={group?.imageUrl ? `https://${group.imageUrl}` : defaultImage} 
           alt="그룹 이미지" 
         />
 
@@ -206,13 +220,9 @@ export default function GroupDetail() {
         </div>
 
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {tabName === "Public"
-            ? publicMemories.map((memory, index) => 
-                <PublicPostCard key={index} id={index + 1} groupId={groupId} {...memory} />
-              )
-            : privateMemories.map((memory, index) => 
-                <PrivatePostCard key={index} id={index + 1} groupId={groupId} {...memory} />
-              )}
+        {publicMemories.map((memory) => 
+                <PublicPostCard key={memory.id} groupId={groupId} {...memory} />
+           )}
         </div>
 
         <div className="p-6">
