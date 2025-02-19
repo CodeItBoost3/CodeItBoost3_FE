@@ -9,7 +9,6 @@ export default function PublicPostCard({
   title,
   author, 
   groupId,
-  visibility, 
   location, 
   date, 
   tags, 
@@ -36,8 +35,6 @@ export default function PublicPostCard({
       <div className="p-4 space-y-2">
         <div className="flex items-center text-darkerGray text-sm">
           <span className="font-medium">{author}</span>
-          <span className="mx-2">|</span>
-          <span>{visibility}</span>
         </div>
 
         <p className="text-black-active text-md font-medium leading-tight">
