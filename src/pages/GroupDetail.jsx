@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
-
+import DeleteIcon from "@/assets/icon/mypage/delete.svg";
 import userService from "@/services/user/userService";
 import defaultImage from '@/assets/icon/main/default-image.png';
 import groupService from '@/services/group/groupService';
@@ -206,6 +206,22 @@ export default function GroupDetail() {
     }
   };
 
+  const handleDeleteGroupImage = async () => {
+    if (!group?.groupId) return;
+  
+    if (!window.confirm("정말 그룹 이미지를 삭제하시겠습니까?")) return;
+  
+    try {
+      await groupService.deleteGroupImage(group.groupId);
+      addToast("그룹 이미지가 삭제되었습니다.");
+      
+      const updatedGroup = await groupService.getGroupDetail(group.groupId);
+      setGroup(updatedGroup);
+    } catch {
+      addToast("그룹 이미지 삭제에 실패했습니다.");
+    }
+  };
+  
   
   return (
     <div className="w-full max-w-[1200px] mx-auto py-3">
@@ -215,7 +231,14 @@ export default function GroupDetail() {
           src={group?.imageUrl ? `https://${group.imageUrl}` : defaultImage} 
           alt="그룹 이미지" 
         />
-
+          {isAdmin && group?.imageUrl && (
+            <button
+              className="absolute top-4 left-[200px] bg-red-500 text-white p-2 rounded-full flex items-center justify-center"
+              onClick={handleDeleteGroupImage}
+            >
+              <img src={DeleteIcon} alt="이미지 삭제" className="w-5 h-5" />
+            </button>
+          )}
         <div className="flex-1 ml-6 space-y-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-black">{group?.dday || "D+0"}</span>

@@ -123,15 +123,10 @@ export const searchGroups = async (keyword) => {
   if (!keyword.trim()) {
     throw new Error("검색어를 입력해 주세요.");
   }
-  return axiosInstance
-    .get(`/api/groups/search`, { params: { keyword } })
-    .then((response) => response.data)
-    .catch((error) => {
-      console.error("그룹 검색 실패:", error);
-      throw error;
-    });
-};
 
+  return axiosInstance.get(`/api/groups/search`, { params: { keyword } })
+    .then((response) => response.data);
+};
 
 const groupService = {
   createGroup,

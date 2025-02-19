@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { IoRefresh } from "react-icons/io5";
 
 import userService from "@/services/user/userService";
 import groupService from "@/services/group/groupService";
@@ -38,6 +39,8 @@ export default function Group() {
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const [searchResult, setSearchResult] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
   const tabName = searchParams.get(GROUP_PARAMS) || "Public";
   const isPublic = tabName === "Public";
@@ -57,15 +60,17 @@ export default function Group() {
   }, []);
   
   useEffect(() => {
+    if (isSearching) return;
+
     const fetchGroupList = async () => {
       try {
         const response = await groupService.getGroupList({
           type: isPublic ? "public" : "private",
           sortBy,
-          keyword: searchTerm,
+          keyword: "",
           page: currentPage,
         });
-    
+
         if (response.status === "success") {
           setGroupData(response.data.groups || []);
           setTotalPages(response.data.totalPage);
@@ -76,19 +81,46 @@ export default function Group() {
         addToast("그룹 목록 조회에 실패했습니다.");
       }
     };
-    
 
     fetchGroupList();
-  }, [isPublic, searchTerm, sortBy, currentPage]);
+  }, [isPublic, sortBy, currentPage, isSearching]);
 
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
   }, [searchParams]);
   
-  const handleSearch = () => {
-    console.log("검색어:", searchTerm);
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      addToast("검색어를 입력하세요.");
+      return;
+    }
+  
+    setIsSearching(true);
+    setSearchResult([]);
+  
+    try {
+      const response = await groupService.searchGroups(searchTerm);
+      console.log("[DEBUG] 검색 API 응답:", response);
+  
+      if (response.status === "success") {
+        setSearchResult(response.data || []); 
+      } else {
+        throw new Error("검색 실패");
+      }
+    } catch (error) {
+      console.error("[ERROR] 그룹 검색 실패:", error);
+      addToast("검색 결과를 불러오는 중 오류가 발생했습니다.");
+    }
   };
   
+  
+
+  const resetSearch = () => {
+    setSearchTerm("");
+    setIsSearching(false);
+    setSearchResult([]);
+  };
+
   const handleSelect = (selectedValue) => {
     if (selectedValue !== sortBy) {
       setSortBy(selectedValue);
@@ -163,6 +195,11 @@ export default function Group() {
           onChange={(e) => setSearchTerm(e.target.value)}
           onEnter={handleSearch}
         />
+        {isSearching && (
+          <button onClick={resetSearch} className="p-2 text-gray-500 font-bold hover:text-black">
+            <IoRefresh size={28} />
+          </button>
+        )}
         <SearchButton
           name="검색하기"
           onClick={handleSearch}
@@ -171,50 +208,55 @@ export default function Group() {
       </div>
 
       <div className="w-full mt-3 py-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {groupData.length > 0 ? (
-            groupData.map((group) =>
-              isPublic ? (
-                <PublicGroupCard
-                  id={group.groupId}
-                  key={group.groupId}
-                  title={group.groupName}
-                  description={group.description}
-                  image={group.image}
-                  picturecount={group.postCount}
-                  emotioncount={group.likeCount}
-                  badgecount={group.badgecount}
-                  days={group.dday}
-                />
-              ) : (
-              <PrivateGroupCard
-                onClose={() => setIsPasswordModalOpen(false)}
-                id={group.groupId}
-                key={group.groupId}
-                title={group.groupName}
-                days={group.dday}
-                emotioncount={group.likeCount}
-                picturecount={group.postCount}
-                onClick={handlePrivateGroupClick}
-              />
 
-              )
-            )
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {(isSearching ? searchResult : groupData).length > 0 ? (
+        (isSearching ? searchResult : groupData).map((group) =>
+          group.isPublic ? (
+            <PublicGroupCard
+              id={group.groupId}
+              key={group.groupId}
+              title={group.groupName}
+              description={group.description}
+              image={group.imageUrl}
+              picturecount={group.postCount}
+              emotioncount={group.likeCount}
+              badgecount={group.badgeCount}
+              days={group.dday}
+            />
           ) : (
-            <div className="bg-white min-w-[85vw] h-[80vh] max-h-[80vh] w-full rounded-[30px]">
-              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-              <img src={NoGroupImg} alt="No Group" className="w-30 h-30 mb-4" />
-              <p className="text-lg font-semibold">{isPublic ? "등록된 공개 그룹이 없습니다." : "등록된 비공개 그룹이 없습니다."}</p>
-              <p className="text-sm text-gray-400">가장 먼저 그룹을 만들어보세요!</p>
+            <PrivateGroupCard
+              id={group.groupId}
+              key={group.groupId}
+              title={group.groupName}
+              days={group.dday}
+              emotioncount={group.likeCount}
+              picturecount={group.postCount}
+              onClick={handlePrivateGroupClick}
+            />
+          )
+        )
+      ) : (
+        <div className="bg-white min-w-[85vw] h-[80vh] max-h-[80vh] w-full rounded-[30px]">
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+            <img src={NoGroupImg} alt="No Group" className="w-30 h-30 mb-4" />
+            <p className="text-lg font-semibold">
+              {isSearching ? "검색 결과가 없습니다." : isPublic ? "등록된 공개 그룹이 없습니다." : "등록된 비공개 그룹이 없습니다."}
+            </p>
+            <p className="text-sm text-gray-400">가장 먼저 그룹을 만들어보세요!</p>
+            {!isSearching && (
               <button onClick={() => setIsModalOpen(true)}
                       className="mt-4 px-5 py-2 bg-normalViolet hover:bg-normalViolet-hover active:bg-normalViolet-active text-white text-sm font-medium rounded-md">
                 그룹 만들기
               </button>
-              </div>
+            )}
           </div>
-          )}
-          {isModalOpen && <CreateGroup onClose={() => setIsModalOpen(false)} />}
         </div>
+      )}
+      {isModalOpen && <CreateGroup onClose={() => setIsModalOpen(false)} />}
+    </div>
+
+
       </div>
       {isPasswordModalOpen && (
         <PrivateGroupModal
