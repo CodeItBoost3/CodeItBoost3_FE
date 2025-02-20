@@ -8,6 +8,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 export default function MyCommentList() {
   const [replyData, setReplyData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const addToast = useToast();
 
@@ -15,7 +16,10 @@ export default function MyCommentList() {
     const fetchMyComments = async () => {
       try {
         const data = await userService.getMyComments(currentPage, 10);
-        setReplyData(data?.data?.comments || []);
+        if(data.status === "success") {
+          setTotalPages(data?.data?.totalPages);
+          setReplyData(data?.data?.comments || []);
+        }
       } catch {
         addToast("내가 작성한 댓글을 불러오는 데 실패했습니다.");
       } finally {
@@ -43,7 +47,7 @@ export default function MyCommentList() {
       )}
 
       <div className="mt-6">
-        <Pagination currentPage={currentPage} totalPages={5} onPageChange={setCurrentPage} />
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
     </div>
   );

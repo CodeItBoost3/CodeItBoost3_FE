@@ -29,7 +29,6 @@ export default function Main() {
   const navigate = useNavigate();
   const addToast = useToast();
 
-  console.log(recentPosts)
   /** 사용자 정보 조회 **/
   useEffect(() => {
     const fetchUserInfo = async () => {
