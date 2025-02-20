@@ -30,7 +30,7 @@ export const getScrapDetail = async (postId) => {
 };
 
 /** 스크랩 목록 조회 (페이지네이션, 검색, 정렬) */
-export const getScrapList = async ({ page = 1, pageSize = 10, sortBy = "latest", keyword = "", isPublic = null, postId = null }) => {
+export const getScrapList = async ({ page = 1, pageSize = 10, sortBy = "latest", keyword = "", postId = null }) => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
@@ -44,11 +44,10 @@ export const getScrapList = async ({ page = 1, pageSize = 10, sortBy = "latest",
         pageSize,
         sortBy,
         keyword,
-        isPublic,
         postId,
       },
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error("스크랩 목록 조회 오류:", error);
     throw new Error(error.response?.data?.message || "스크랩 목록 조회 중 오류 발생");
