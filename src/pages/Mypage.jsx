@@ -24,6 +24,7 @@ export default function Mypage() {
   const articlescrollRef = useRef(null);
   const replyScrollRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [nickname, setNickname] = useState("예비 사용자");
   const [isTimeoutPassed, setIsTimeoutPassed] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -39,13 +40,15 @@ export default function Mypage() {
   const handleViewAllComments = () => {
     navigate("/mypage/comments");
   };
-  
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const data = await userService.getUserInfo();
         setNickname(data.data.nickname);
+        setIsLogin(true);
       } catch {
+        setIsLogin(false);
         addToast("사용자 정보를 불러올 수 없습니다.");
       } finally {
         setIsLoading(false);
@@ -64,31 +67,32 @@ export default function Mypage() {
   useEffect(() => {
       const fetchMyPosts = async () => {
         try {
-          const response = await userService.getMyPosts(1, 5); 
+          const response = await userService.getMyPosts(1, 5);
           const posts = response?.data?.posts || [];
-    
+
           if (posts.length === 0) {
             setPublicMemories([]);
             return;
           }
-    
+
           setPublicMemories(
             posts.map((post) => ({
               postId: post.postId || null,
+              groupId: post.group?.groupId || null,
               title: post.title || "제목 없음",
               content: post.content || "내용 없음",
-              tags: Array.isArray(post.tag) ? post.tag : [], 
+              tag: Array.isArray(post.tag) ? post.tag : [],
               moment: post.moment
                 ? new Date(post.moment).toLocaleDateString("ko-KR")
                 : "날짜 없음",
               createdAt: post.createdAt
                 ? new Date(post.createdAt).toLocaleDateString("ko-KR")
                 : "날짜 없음",
+              imageUrl: post?.imageUrl ? `https://${post.imageUrl}` : null,
               likeCount: post.likeCount || 0,
               commentCount: post.commentCount || 0,
               author: post.author?.nickname || "알 수 없음",
-              groupName: post.group?.groupName || "그룹 없음",
-              isPublic: post.group?.isPublic ?? true,
+              location: post.group?.groupName || "그룹 없음",
             }))
           );
         } catch (error) {
@@ -159,7 +163,7 @@ export default function Mypage() {
 
       <div className="flex gap-10 max-w-[93%]">
         <ProfileEditCard onClickEdit={handleEdit} />
-        <MemoryAction />
+        <MemoryAction isLogin={!isLogin}/>
         <GroupCard />
       </div>
 
@@ -180,8 +184,8 @@ export default function Mypage() {
         <div ref={articlescrollRef} className="max-w-[85vw] overflow-x-auto scroll-smooth hide-scrollbar h-full">
           {publicMemories.length > 0 ? (
             <div className="grid grid-flow-col gap-3 w-max">
-              {publicMemories.map((memory, index) => (
-                <PublicPostCard key={index} id={index + 1} group={1} {...memory} />
+              {publicMemories.map((memory) => (
+                <PublicPostCard key={memory.postId} id={memory.postId} group={memory.groupId} {...memory} />
               ))}
             </div>
           ) : (
