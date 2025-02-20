@@ -1,61 +1,113 @@
 import { useState, useEffect } from "react";
-import { X, ChevronRight } from "lucide-react";
+import { X, Trash2, ChevronRight } from "lucide-react";
+import { useToast } from "@/hooks/useToast";
 import TimeIcon from "@/assets/icon/notification/time.svg";
 import notificationService from "@/services/notification/notificationService";
 
 export default function Notification({ onClose }) {
   const [notifications, setNotifications] = useState([]);
+  const addToast = useToast();
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const data = await notificationService.getNotification();
-        setNotifications(data.notifications || []);
+        setNotifications(data || []);
       } catch (error) {
-        console.error(error.message);
+        addToast(error.message);
       }
     };
 
     fetchNotifications();
   }, []);
 
-  const truncateText = (text, maxLength) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  const handleDeleteNotification = async (id) => {
+    try {
+      await notificationService.deleteNotification(id);
+      setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+    } catch (error) {
+      addToast(error.message);
+    }
+  };
+
+  const handleClearAllNotifications = async () => {
+    if (!window.confirm("모든 알림을 삭제하시겠습니까?")) return;
+
+    try {
+      await notificationService.clearNotifications();
+      setNotifications([]);
+    } catch (error) {
+      addToast(error.message);
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    return new Date(timestamp).toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   };
 
   return (
-    <div className="relative w-[20vw] min-w-[300px] min-h-[60vh] bg-bg-violet rounded-lg shadow-lg p-4">
-        
+    <div className="relative w-[20vw] min-w-[320px] min-h-[60vh] bg-bg-violet rounded-lg shadow-lg p-4">
       <div className="absolute top-[-8px] right-10 w-5 h-5 bg-bg-violet transform rotate-45"></div>
 
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <img src={TimeIcon} className="w-5 h-5 text-normalViolet-active" />
-          <span className="text-black font-medium">알림 목록</span>
+          <span className="text-black font-medium text-lg">알림 목록</span>
         </div>
-        <button onClick={onClose} className="text-gray-500 hover:text-black">
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-3">
+
+          <button 
+            onClick={handleClearAllNotifications} 
+            className="text-gray-600 hover:text-black text-sm font-medium px-2 py-1 rounded-md hover:bg-gray-200 transition"
+          >
+            전체 삭제
+          </button>
+          <button onClick={onClose} className="text-gray-500 hover:text-black">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-3">
         {notifications.length > 0 ? (
-          notifications.map((notification, index) => (
+          notifications.map((notification) => (
             <div
-              key={index}
-              className="flex cursor-pointer items-center justify-between overflow-hidden bg-white p-3 rounded-lg shadow-sm hover:bg-gray-50"
+              key={notification.id}
+              className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm hover:bg-gray-50 transition"
             >
               <div>
-                <h3 className="text-sm font-medium text-black">
-                  {truncateText(notification.title, 20)}
+                <h3 className="text-sm font-semibold text-black whitespace-nowrap">
+                  {notification.title}
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  {truncateText(notification.description, 20)}
+                <p className="text-xs text-gray-600 mt-1">
+                  {notification.content}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  🕒 {formatDate(notification.time)}
                 </p>
               </div>
-              <button className="text-gray-400 hover:text-black">
-                <ChevronRight className="w-4 h-4 text-black" />
-              </button>
+
+              <div className="flex items-center gap-2">
+
+                <button 
+                  onClick={() => handleDeleteNotification(notification.id)}
+                  className="text-gray-500 hover:text-red-400 transition"
+                  title="삭제"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                
+                <button className="text-gray-400 hover:text-black">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           ))
         ) : (

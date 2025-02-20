@@ -29,7 +29,6 @@ export default function Main() {
   const navigate = useNavigate();
   const addToast = useToast();
 
-  console.log(recentPosts)
   /** 사용자 정보 조회 **/
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -78,7 +77,6 @@ export default function Main() {
         } else{
           throw new Error("내가 작성한 글 목록 조회 실패");
         }
-        console.log(response);
       } catch {
         addToast("최근에 작성한 글 조회에 실패했습니다.");
       }
