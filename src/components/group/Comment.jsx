@@ -89,8 +89,8 @@ function Comment({ postId, comment, onEdit, onDelete, onLike, onReply, myId }) {
             className="w-full text-gray-800 text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none"
           />
           <button onClick={() => handleReplySubmit(comment.commentId, replyContent)} className="text-darkViolet text-sm font-semibold">
-            작성
-          </button>
+          <PaperAirplaneIcon className="w-6 h-6 text-darkerGray" />
+        </button>
         </div>
       )}
 
