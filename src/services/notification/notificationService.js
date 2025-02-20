@@ -38,31 +38,33 @@ export const connectSSE = (onMessage) => {
   
 /** 알림 가져오기 */
 export const getNotification = async () => {
-    try {
+  try {
       let allNotifications = [];
       let currentPage = 1;
       let totalPages = 1;
-  
+
       while (currentPage <= totalPages) {
-        const response = await axiosInstance.get(`/users/me/notifications?page=${currentPage}&pageSize=20`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-        });
-  
-        const { transformedNotifications, totalPages: fetchedTotalPages } = response.data;
-        
-        if (transformedNotifications) {
-          allNotifications = [...allNotifications, ...transformedNotifications];
-        }
-  
-        totalPages = fetchedTotalPages;
-        currentPage += 1;
+          const response = await axiosInstance.get(`/users/me/notifications?page=${currentPage}&pageSize=20`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+          });
+
+          const { data } = response; // ✅ 서버 응답 구조 반영
+          const { transformedNotifications, totalPages: fetchedTotalPages } = data.data; 
+
+          if (transformedNotifications) {
+              allNotifications = [...allNotifications, ...transformedNotifications];
+          }
+
+          totalPages = fetchedTotalPages;
+          currentPage += 1;
       }
-  
+
       return allNotifications;
-    } catch {
+  } catch {
       throw new Error("알림 가져오기 실패");
-    }
-  };
+  }
+};
+
   
 
 /** 알림 비우기 */

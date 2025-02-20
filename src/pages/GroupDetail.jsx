@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { IoRefresh } from "react-icons/io5";
-
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import DeleteIcon from "@/assets/icon/mypage/delete.svg";
@@ -44,6 +44,7 @@ export default function GroupDetail() {
   const [isSearching, setIsSearching] = useState(false); 
   const GROUP_PARAMS = 'group';
   const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
+  const [floatingIcons, setFloatingIcons] = useState([]);
 
   const options = [
     { label: "최신순", value: "latest" },
@@ -242,7 +243,26 @@ useEffect(() => {
   fetchSearchResults();
 }, [isSearching]); 
 
+const handleLikeGroup = async () => {
+  try {
+    await groupInteractionService.likeGroup(groupId);
+    setGroup((prevGroup) => ({
+      ...prevGroup,
+      likeCount: prevGroup.likeCount + 1,
+    }));
+    addToast("그룹에 공감했습니다!");
+    setFloatingIcons((prev) => [
+      ...prev,
+      { id: Date.now(), x: Math.random() * (30 - 25) + 25 }
+    ]);
 
+    setTimeout(() => {
+      setFloatingIcons((prev) => prev.slice(1));
+    }, 1500);
+  } catch {
+    addToast("공감 추가 중 오류가 발생했습니다.");
+  }
+};
   
   const handleSelect = (selectedValue) => {
     if (selectedValue !== sortBy) {
@@ -382,7 +402,22 @@ useEffect(() => {
                   참여하기
                 </button>
               ) : null} 
-                <button className="flex items-center w-[150px] whitespace-nowrap px-5 py-2 bg-white hover:bg-background active:bg-darkWhite border rounded-lg">
+                  <AnimatePresence>
+                  {floatingIcons.map((icon) => (
+                    <motion.img
+                      key={icon.id}
+                      src={LogoImage}
+                      alt="공감 아이콘"
+                      className="absolute w-5 h-5"
+                      initial={{ opacity: 1, y: 0, scale: 1 }}
+                      animate={{ opacity: 0, y: -60, scale: 1.2 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1 }}
+                      style={{ left: `${50 + icon.x}%`, transform: "translateX(-50%)" }}
+                    />
+                  ))}
+                </AnimatePresence>
+                <button onClick={handleLikeGroup} className="flex items-center w-[150px] whitespace-nowrap px-5 py-2 bg-white hover:bg-background active:bg-darkWhite border rounded-lg">
                   <img src={LogoImage} alt="공감 아이콘" className="w-5 h-5 mr-2" />
                   공감 보내기
                 </button>
