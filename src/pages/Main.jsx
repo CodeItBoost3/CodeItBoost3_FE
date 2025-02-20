@@ -1,8 +1,13 @@
 import {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
+
+import dayjs from "dayjs";
+
+import {useToast} from "@/hooks/useToast";
+
 import groupService from "@/services/group/groupService.js";
 import userService from "@/services/user/userService";
-import {useToast} from "@/hooks/useToast";
+
 
 import PublicGroupCard from "@/components/common/PublicGroupCard";
 import NoticeCard from "@/components/main/NoticeCard";
@@ -44,12 +49,16 @@ export default function Main() {
   useEffect(() => {
     const fetchGroupList = async () => {
       try {
-        const data = await groupService.getGroupList({
+        const response = await groupService.getGroupList({
           type: "public",
           sortBy: "latest",
           keyword: "",
         });
-        setGroupList(data.data || []);
+        if(response.status === "success") {
+          setGroupList(response.data.groups || []);
+        } else{
+          throw new Error("그룹 목록 조회 실패");
+        }
       } catch {
         addToast("그룹 목록 조회에 실패했습니다.");
       }
@@ -62,8 +71,13 @@ export default function Main() {
   useEffect(() => {
     const fetchRecentPosts = async () => {
       try {
-        const data = await userService.getMyPosts();
-        setRecentPosts(data.data || []);
+        const response = await userService.getMyPosts();
+        if(response.status === "success") {
+          setRecentPosts(response.data.posts || []);
+        } else{
+          throw new Error("내가 작성한 글 목록 조회 실패");
+        }
+        console.log(response);
       } catch {
         addToast("최근에 작성한 글 조회에 실패했습니다.");
       }
@@ -163,10 +177,10 @@ export default function Main() {
                           key={item.id}
                           index={idx}
                           title={item.title}
-                          date={item.date}
-                          memory={item.memory}
-                          sympathy={item.sympathy}
-                          comments={item.comments}
+                          date={dayjs(item.createdAt).format("YYYY.MM.DD")}
+                          group={item.group.groupName}
+                          sympathy={item.likeCount}
+                          comments={item.commentCount}
                       />
                   ))
               ) : (
