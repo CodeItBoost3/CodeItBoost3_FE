@@ -2,7 +2,7 @@ import axiosInstance from "@/services/axiosInstance";
 import userService from "@/services/user/userService";
 
 /** 댓글 작성 */
-export const createComment = async (postId, content) => {
+export const createComment = async (postId, content, parentId = null) => {
   const token = localStorage.getItem("accessToken");
 
   if (!token) {
@@ -10,7 +10,6 @@ export const createComment = async (postId, content) => {
   }
 
   try {
- 
     const userInfo = await userService.getUserInfo();
     const userId = userInfo?.data.id;
 
@@ -21,6 +20,7 @@ export const createComment = async (postId, content) => {
     const requestBody = {
       content,
       userId: Number(userId),
+      ...(parentId && { parentId }), // ✅ parentId가 있을 경우에만 추가
     };
 
     return axiosInstance
@@ -38,6 +38,7 @@ export const createComment = async (postId, content) => {
     throw new Error(error.message || "사용자 정보를 가져오는 중 오류가 발생했습니다.");
   }
 };
+
 
 /** 특정 게시글의 댓글 조회 */
 export const getCommentsByPost = async (postId) => {
