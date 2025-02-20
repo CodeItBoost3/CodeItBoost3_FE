@@ -7,11 +7,10 @@ export const createGroup = async (formData) => {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
-  // API 문서에 맞게 JSON 데이터를 FormData에 추가
   const payload = {
     name: formData.get("name"),
     introduction: formData.get("introduction"),
-    isPublic: formData.get("isPublic") === "true", // 문자열을 boolean으로 변환
+    isPublic: formData.get("isPublic") === "true",
   };
 
   if (formData.get("password")) {
@@ -21,7 +20,6 @@ export const createGroup = async (formData) => {
   const finalFormData = new FormData();
   finalFormData.append("data", JSON.stringify(payload));
 
-  // 이미지 파일 추가 (선택 사항)
   if (formData.get("groupImage")) {
     finalFormData.append("groupImage", formData.get("groupImage"));
   }
@@ -30,8 +28,6 @@ export const createGroup = async (formData) => {
     .post(`/api/groups`, finalFormData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        // ❌ `finalFormData.getHeaders()` 제거
-        // Axios가 자동으로 `Content-Type`을 설정하므로 필요 없음
       },
     })
     .then((response) => response.data)
@@ -87,12 +83,27 @@ export const updateGroup = async (groupId, updatedData) => {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(updatedData));
+
+  if (updatedData.groupImage) {
+    formData.append("groupImage", updatedData.groupImage);
+  }
+
+  for (let pair of formData.entries()) {
+    console.log("   ", pair[0], pair[1]);
+  }
+
   return axiosInstance
-    .put(`/api/groups/${groupId}`, updatedData, {
-      headers: { Authorization: `Bearer ${token}` },
+    .patch(`/api/groups/${groupId}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     })
     .then((response) => response.data);
 };
+
 
 /** 그룹 삭제 */
 export const deleteGroup = async (groupId) => {
@@ -127,15 +138,10 @@ export const searchGroups = async (keyword) => {
   if (!keyword.trim()) {
     throw new Error("검색어를 입력해 주세요.");
   }
-  return axiosInstance
-    .get(`/api/groups/search`, { params: { keyword } })
-    .then((response) => response.data)
-    .catch((error) => {
-      console.error("그룹 검색 실패:", error);
-      throw error;
-    });
-};
 
+  return axiosInstance.get(`/api/groups/search`, { params: { keyword } })
+    .then((response) => response.data);
+};
 
 const groupService = {
   createGroup,

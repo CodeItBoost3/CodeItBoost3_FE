@@ -3,25 +3,38 @@ import commentService from "@/services/comment/commentService";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useToast } from "@/hooks/useToast";
 
+import userService from "@/services/user/userService";
 import userProfile from "@/assets/icon/group/default-profile.svg";
 import EditIcon from "@/assets/icon/group/comment-edit.svg";
 import DeleteIcon from "@/assets/icon/group/comment-delete.svg";
 import defaultComment from "@/assets/icon/group/no-comment.svg";
 
-function Comment({ comment, onEdit, onDelete }) {
+
+function Comment({ comment, onEdit, onDelete, onLike, myId }) {
   return (
     <div className="flex items-start space-x-3 py-3 border-t border-gray-200">
       <img src={comment.profile || userProfile} alt="프로필" className="w-8 h-8 rounded-full" />
       <div className="flex-1">
-        <span className="text-sm font-semibold">{comment.author}</span>
+        <span className="text-sm font-semibold">{comment.nickname}</span>
         <p className="text-gray-800 text-sm mt-1">{comment.content}</p>
-      </div>
-      <div className="flex flex-col gap-2 items-end justify-between">
-        <span className="text-xs text-darkGray-active">{comment.date}</span>
-        <div className="flex gap-2 mt-1">
-          <img src={EditIcon} alt="수정" className="w-4 h-4 cursor-pointer" onClick={() => onEdit(comment)} />
-          <img src={DeleteIcon} alt="삭제" className="w-4 h-4 cursor-pointer" onClick={() => onDelete(comment.id)} />
+
+        <div className="flex items-center gap-2 mt-2">
+          <button onClick={() => onLike(comment.commentId)} className="text-darkGray hover:text-darkViolet transition">
+            {comment.isLiked ? "💜" : "🤍"} {comment.likeCount || 0}
+          </button>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2 items-end justify-between">
+        <span className="text-xs text-darkGray-active">
+          {new Date(comment.createdAt).toLocaleDateString("ko-KR")} 
+        </span>
+        {comment.userId === myId && (
+          <div className="flex gap-2 mt-1">
+            <img src={EditIcon} alt="수정" className="w-4 h-4 cursor-pointer" onClick={() => onEdit(comment)} />
+            <img src={DeleteIcon} alt="삭제" className="w-4 h-4 cursor-pointer" onClick={() => onDelete(comment.commentId)} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -31,16 +44,28 @@ export default function CommentSection({ postId }) {
   const addToast = useToast();
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [myId, setMyId] = useState(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const data = await userService.getUserInfo();
+        setMyId(data.data.id);
+      } catch {
+        addToast("사용자 정보를 불러오는 중 오류가 발생했습니다.");
+      }
+    };
+  
+    fetchUserInfo();
+  }, []);
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
         const response = await commentService.getCommentsByPost(postId);
-        console.log("API 응답:", response);
-        if (Array.isArray(response)) {
-          setComments(response);
-        } else if (response.comments && Array.isArray(response.comments)) {
-          setComments(response.comments);
+  
+        if (response.status === "success" && response.data?.comments) {
+          setComments(response.data.comments);
         } else {
           setComments([]);
         }
@@ -48,11 +73,11 @@ export default function CommentSection({ postId }) {
         addToast("댓글을 불러오는 중 오류가 발생했습니다.");
       }
     };
-
+  
     fetchComments();
   }, [postId]);
+  
 
-/** 댓글 작성 */
 const handleCommentSubmit = async () => {
   if (newComment.trim() === "") return;
 
@@ -77,33 +102,55 @@ const handleKeyDown = (e) => {
   }
 };
 
-  /** 댓글 수정 */
   const handleCommentEdit = async (comment) => {
     const updatedContent = prompt("수정할 내용을 입력하세요:", comment.content);
     if (!updatedContent) return;
 
     try {
-      await commentService.updateComment(comment.id, updatedContent);
+      await commentService.updateComment(comment.commentId, updatedContent);
       setComments((prevComments) =>
-        prevComments.map((c) => (c.id === comment.id ? { ...c, content: updatedContent } : c))
+        prevComments.map((c) => (c.commentId === comment.commentId ? { ...c, content: updatedContent } : c))
       );
     } catch {
       addToast("댓글 수정 중 오류가 발생했습니다.");
     }
   };
 
-  /** 댓글 삭제 */
   const handleCommentDelete = async (commentId) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
     try {
       await commentService.deleteComment(commentId);
-      setComments((prevComments) => prevComments.filter((c) => c.id !== commentId));
+      setComments((prevComments) => prevComments.filter((c) => c.commentId !== commentId));
     } catch {
       addToast("댓글 삭제 중 오류가 발생했습니다.");
     }
   };
 
+  const handleCommentLike = async (commentId) => {
+    try {
+      const response = await commentService.likeComment(commentId);
+  
+      const { liked, likeCount } = response.data;
+  
+      setComments((prevComments) =>
+        prevComments.map((c) =>
+          c.commentId === commentId ? { ...c, likeCount, isLiked: liked } : c
+        )
+      );
+  
+      if (liked) {
+        addToast("좋아요가 추가되었습니다! 💜");
+      } else {
+        addToast("좋아요가 취소되었습니다. 💔");
+      }
+    } catch (error) {
+      addToast("좋아요 요청 중 오류가 발생했습니다.");
+      console.error("좋아요 요청 오류:", error);
+    }
+  };
+  
+  
   return (
     <div className="w-full max-w-[900px] mx-auto mt-6">
 
@@ -130,7 +177,7 @@ const handleKeyDown = (e) => {
           </div>
         ) : (
           comments.map((comment) => ( 
-            <Comment key={comment.id} comment={comment} onEdit={handleCommentEdit} onDelete={handleCommentDelete} />
+            <Comment key={comment.commentId} comment={comment} onEdit={handleCommentEdit} onDelete={handleCommentDelete} onLike={handleCommentLike} myId={myId} />
           ))
         )}
       </div>
