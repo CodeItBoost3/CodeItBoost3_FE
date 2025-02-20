@@ -11,6 +11,8 @@ const Notice = lazy(() => import("@/pages/Notice"));
 const NoticeDetail = lazy(() => import("@/pages/NoticeDetail"));
 const Scrap = lazy(() => import("@/pages/Scrap"));
 const Mypage = lazy(() => import("@/pages/Mypage"));
+const MyPostList = lazy(() => import("@/pages/MyPostList"));
+const MyCommentList = lazy(() => import("@/pages/MyCommentList"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const routesConfig = [
@@ -26,6 +28,8 @@ const routesConfig = [
       { path: "notice/:noticeId", element: <Suspense fallback={<LoadingSpinner size={200} />}><NoticeDetail /></Suspense> },
       { path: "scrap", element: <Suspense fallback={<LoadingSpinner size={200} />}><Scrap /></Suspense> },
       { path: "mypage", element: <Suspense fallback={<LoadingSpinner size={200} />}><Mypage /></Suspense> },
+      { path: "mypage/posts", element: <Suspense fallback={<LoadingSpinner size={200} />}><MyPostList /></Suspense> },
+      { path: "mypage/comments", element: <Suspense fallback={<LoadingSpinner size={200} />}><MyCommentList /></Suspense> },
     ],
   },
   { path: "/login", element: <Suspense fallback={<LoadingSpinner size={200} />}><Login /></Suspense> },
