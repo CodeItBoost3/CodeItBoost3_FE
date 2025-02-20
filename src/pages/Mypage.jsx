@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import PublicPostCard from "@/components/group/PublicPostCard.jsx";
@@ -30,7 +31,15 @@ export default function Mypage() {
   const [publicMemories, setPublicMemories] = useState([]);
   const [repliyDatas, setRepliyDatas] = useState([]);
   const addToast = useToast();
-
+  const navigate = useNavigate();
+  const handleViewAllPosts = () => {
+    navigate("/mypage/posts");
+  };
+  
+  const handleViewAllComments = () => {
+    navigate("/mypage/comments");
+  };
+  
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -53,37 +62,41 @@ export default function Mypage() {
   }, []);
 
   useEffect(() => {
-    const fetchMyPosts = async () => {
-      try {
-        const data = await userService.getMyPosts(1, 5);
-        const posts = data?.data?.posts || [];
-  
-        if (posts.length === 0) {
-          setPublicMemories([]);
-          return;
-        }
-  
-        setPublicMemories(
-          posts.map((post) => ({
-            author: post.author?.nickname || "알 수 없음",
-            visibility: "공개",
-            title: post.title || "제목 없음",
-            location: post.group?.groupName || "위치 없음",
-            date: post.createdAt
-              ? new Date(post.createdAt).toLocaleDateString("ko-KR")
-              : "날짜 없음",
-            tags: post.tag || [],
-            likes: post.likeCount || 0,
-            comments: post.commentCount || 0,
-          }))
-        );
-      } catch (error) {
-        console.error("내가 작성한 글 불러오기 실패:", error);
-        if (error.response?.status !== 200) {
+      const fetchMyPosts = async () => {
+        try {
+          const response = await userService.getMyPosts(1, 5); 
+          const posts = response?.data?.posts || [];
+    
+          if (posts.length === 0) {
+            setPublicMemories([]);
+            return;
+          }
+    
+          setPublicMemories(
+            posts.map((post) => ({
+              postId: post.postId || null,
+              title: post.title || "제목 없음",
+              content: post.content || "내용 없음",
+              tags: Array.isArray(post.tag) ? post.tag : [], 
+              moment: post.moment
+                ? new Date(post.moment).toLocaleDateString("ko-KR")
+                : "날짜 없음",
+              createdAt: post.createdAt
+                ? new Date(post.createdAt).toLocaleDateString("ko-KR")
+                : "날짜 없음",
+              likeCount: post.likeCount || 0,
+              commentCount: post.commentCount || 0,
+              author: post.author?.nickname || "알 수 없음",
+              groupName: post.group?.groupName || "그룹 없음",
+              isPublic: post.group?.isPublic ?? true,
+            }))
+          );
+        } catch (error) {
+          console.error("내가 작성한 글 불러오기 실패:", error);
           addToast("내가 작성한 글을 불러오는 데 실패했습니다.");
         }
-      }
-    };
+      };
+    
   
     const fetchMyComments = async () => {
       try {
@@ -153,7 +166,7 @@ export default function Mypage() {
       {/* 작성한 글 */}
       <div className="flex justify-between items-center mt-7 w-[98%]">
         <p className="text-base font-semibold">작성한 글 모음</p>
-        <button className="text-darkGray hover:text-darkGray-hover active:text-darkGray-active font-semibold text-xs">
+        <button onClick={handleViewAllPosts} className="text-darkGray hover:text-darkGray-hover active:text-darkGray-active font-semibold text-xs">
           전체보기
         </button>
       </div>
@@ -189,7 +202,7 @@ export default function Mypage() {
       {/* 작성한 댓글 */}
       <div className="flex justify-between items-center mt-7 max-w-[98%]">
         <p className="text-base font-semibold">작성한 댓글 모음</p>
-        <button className="text-darkGray hover:text-darkGray-hover active:text-darkGray-active font-semibold text-xs">
+        <button onClick={handleViewAllComments} className="text-darkGray hover:text-darkGray-hover active:text-darkGray-active font-semibold text-xs">
           전체보기
         </button>
       </div>

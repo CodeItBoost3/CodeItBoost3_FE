@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { IoRefresh } from "react-icons/io5";
+
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import DeleteIcon from "@/assets/icon/mypage/delete.svg";
@@ -38,7 +40,8 @@ export default function GroupDetail() {
   const [myId, setMyId] = useState(null);
   const [isMember, setIsMember] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-
+  const [searching, setSearching] = useState(false);
+  const [isSearching, setIsSearching] = useState(false); 
   const GROUP_PARAMS = 'group';
   const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
 
@@ -87,65 +90,159 @@ export default function GroupDetail() {
         addToast("그룹 상세 조회에 실패했습니다.");
       }
     };
+    fetchGroupDetail();
+    fetchPosts();
+  }, [groupId]); 
   
-    const fetchPosts = async () => {
-      try {
-        const postList = await postService.getPostList({
-          groupId,
-          page: currentPage,
-          pageSize: 10,
-          sortBy,
-          keyword: searchTerm,
-          isPublic: tabName === "Public",
-        });
-    
-        if (postList.status === "success" && postList.data) {
-          setTotalPages(postList.data.totalPages);
-    
-          setPublicMemories(
-            postList.data.data.map((post) => ({
-              id: post.postId,
-              groupId: post.groupId,
-              author: post.author?.nickname || "알 수 없음",
-              title: post.title || "제목 없음",
-              content: post.content || "내용 없음",
-              imageUrl: post.imageUrl ? `https://${post.imageUrl}` : null,
-              location: post.location || "장소 정보 없음",
-              moment: new Date(post.moment).toLocaleDateString("ko-KR"),
-              createdAt: new Date(post.createdAt).toLocaleDateString("ko-KR"),
-              likeCount: post.likeCount ?? 0,
-              commentCount: post.commentCount ?? 0,
-              tag: post.tag?.length ? post.tag : ["태그 없음"],
-            }))
-          );
-        } else {
-          setPublicMemories([]);
-        }
-      } catch {
-        addToast("게시글 목록 조회에 실패했습니다.");
+  const fetchPosts = async () => {
+    try {
+      const postList = await postService.getPostList({
+        groupId,
+        page: currentPage,
+        pageSize: 10,
+        sortBy,
+        keyword: searchTerm.trim(),
+        isPublic: tabName === "Public",
+      });
+  
+      if (postList.status === "success" && postList.data) {
+        setTotalPages(postList.data.totalPages);
+        setPublicMemories(
+          postList.data.data.map((post) => ({
+            id: post.postId,
+            groupId: post.groupId,
+            author: post.author?.nickname || "알 수 없음",
+            title: post.title || "제목 없음",
+            content: post.content || "내용 없음",
+            imageUrl: post.imageUrl ? `https://${post.imageUrl}` : null,
+            location: post.location || "장소 정보 없음",
+            moment: new Date(post.moment).toLocaleDateString("ko-KR"),
+            createdAt: new Date(post.createdAt).toLocaleDateString("ko-KR"),
+            likeCount: post.likeCount ?? 0,
+            commentCount: post.commentCount ?? 0,
+            tag: post.tag?.length ? post.tag : ["태그 없음"],
+          }))
+        );
+      } else {
+        setPublicMemories([]);
       }
-    };
-    
-  
-    if (groupId) {
-      fetchGroupDetail();
-      fetchPosts();
+    } catch {
+      addToast("게시글 목록 조회에 실패했습니다.");
     }
-  }, [groupId, currentPage, sortBy, searchTerm, tabName]);
-  
+  };
 
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
   }, [searchParams]);
+  
+  const handleSearch = () => {
+    if (!searchTerm.trim()) {
+      setIsSearching(false);
+      setSearching(false);
+      setCurrentPage(1);
+      setPublicMemories([]); 
+      fetchPosts(); 
+      return;
+    }
+  
+    setIsSearching(true);
+  };
 
-  const handleSearch = async () => {
+  const handleRefresh = async () => {
+    setSearchTerm(""); 
+    setCurrentPage(1);
+    setSortBy("mostLiked");
+    setSearchParams({ sortBy: "mostLiked", group: tabName }, { replace: true });
+  
+    setIsSearching(false);
+    setSearching(false);
+    setPublicMemories([]); 
+  
     try {
-      const data = await groupService.searchGroups(searchTerm);
-      setGroup(data.data || []);
+      const postList = await postService.getPostList({
+        groupId,
+        page: 1,
+        pageSize: 10,
+        sortBy: "mostLiked",
+        keyword: "", 
+        isPublic: tabName === "Public",
+      });
+  
+      if (postList.status === "success" && postList.data) {
+        setTotalPages(postList.data.totalPages);
+        setPublicMemories(
+          postList.data.data.map((post) => ({
+            id: post.postId,
+            groupId: post.groupId,
+            author: post.author?.nickname || "알 수 없음",
+            title: post.title || "제목 없음",
+            content: post.content || "내용 없음",
+            imageUrl: post.imageUrl ? `https://${post.imageUrl}` : null,
+            location: post.location || "장소 정보 없음",
+            moment: new Date(post.moment).toLocaleDateString("ko-KR"),
+            createdAt: new Date(post.createdAt).toLocaleDateString("ko-KR"),
+            likeCount: post.likeCount ?? 0,
+            commentCount: post.commentCount ?? 0,
+            tag: post.tag?.length ? post.tag : ["태그 없음"],
+          }))
+        );
+      } else {
+        setPublicMemories([]);
+      }
     } catch {
-      addToast("그룹 검색에 실패했습니다.");
+      addToast("게시글 목록을 불러오는 데 실패했습니다.");
     }
   };
+  
+
+useEffect(() => {
+  if (!groupId || !isSearching) return;
+
+  const fetchSearchResults = async () => {
+    setSearching(true);
+
+    try {
+      const postList = await postService.getPostList({
+        groupId,
+        page: currentPage,
+        pageSize: 10,
+        sortBy,
+        keyword: searchTerm.trim(), 
+        isPublic: tabName === "Public",
+      });
+
+      if (postList.status === "success" && postList.data) {
+        setPublicMemories(
+          postList.data.data.map((post) => ({
+            id: post.postId,
+            groupId: post.groupId,
+            author: post.author?.nickname || "알 수 없음",
+            title: post.title || "제목 없음",
+            content: post.content || "내용 없음",
+            imageUrl: post.imageUrl ? `https://${post.imageUrl}` : null,
+            location: post.location || "장소 정보 없음",
+            moment: new Date(post.moment).toLocaleDateString("ko-KR"),
+            createdAt: new Date(post.createdAt).toLocaleDateString("ko-KR"),
+            likeCount: post.likeCount ?? 0,
+            commentCount: post.commentCount ?? 0,
+            tag: post.tag?.length ? post.tag : ["태그 없음"],
+          }))
+        );
+      } else {
+        setPublicMemories([]);
+      }
+    } catch {
+      addToast("게시글 검색에 실패했습니다.");
+    } finally {
+      setSearching(false);
+      setIsSearching(false); 
+    }
+  };
+
+  fetchSearchResults();
+}, [isSearching]); 
+
+
   
   const handleSelect = (selectedValue) => {
     if (selectedValue !== sortBy) {
@@ -235,7 +332,7 @@ export default function GroupDetail() {
 
   
   return (
-    <div className="w-full max-w-[1200px] mx-auto py-3">
+    <div className="w-full max-w-full mx-auto py-3">
       <div className="flex flex-col md:flex-row p-6 relative">
         <img 
           className="w-[180px] h-[180px] rounded-lg object-cover"
@@ -317,29 +414,45 @@ export default function GroupDetail() {
           
         </div>
 
-        <div className="flex mt-4 items-center gap-5">
-          <Select options={options} onSelect={handleSelect} value={sortBy} />
-         
-          <SearchBar
-            name="search"
-            placeholder="그룹 이름을 검색해 주세요."
-            width="w-full"
-            height="h-12"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            onEnter={handleSearch} 
-          />
-          <SearchButton
-            name="검색하기"
-            onClick={handleSearch} 
-            className="h-full whitespace-nowrap font-medium"
-          />
-        </div>
+      {/* 검색 바 & 새로고침 버튼 */}
+      <div className="flex mt-4 items-center gap-5">
+        <Select options={options} onSelect={handleSelect} value={sortBy} />
+      
+        <SearchBar
+          name="search"
+          placeholder="게시글을 검색해 주세요."
+          width="w-full"
+          height="h-12"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onEnter={handleSearch}
+        />
+
+        {searchTerm && (
+          <button onClick={handleRefresh} className="p-2 text-gray-500 font-bold hover:text-black">
+            <IoRefresh size={28} />
+          </button>
+        )}
+
+        <SearchButton
+          name="검색하기"
+          onClick={handleSearch}
+          className="h-full whitespace-nowrap font-medium"
+        />
+      </div>
+
 
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {publicMemories.map((memory) => 
-                <PublicPostCard key={memory.id} groupId={groupId} {...memory} />
-           )}
+        {searching ? (
+          <p className="text-center w-full col-span-4">검색 중...</p>
+        ) : publicMemories.length > 0 ? (
+          publicMemories.map((memory) => (
+            <PublicPostCard key={memory.id} groupId={groupId} {...memory} />
+          ))
+        ) : (
+          <p className="text-center w-full col-span-4">검색 결과가 없습니다.</p>
+        )}
+
         </div>
 
         <div className="p-6">
