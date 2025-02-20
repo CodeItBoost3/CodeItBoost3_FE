@@ -1,16 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
 import { FaTrash, FaEdit } from "react-icons/fa";
+import { useToast } from "@/hooks/useToast";
+import groupService from "@/services/group/groupService";
 
-export default function EditGroupModal({ onClose, groupData, onUpdate }) {
-  const [groupName, setGroupName] = useState(groupData.name);
-  const [groupDescription, setGroupDescription] = useState(groupData.description);
-  const [isPublic, setIsPublic] = useState(groupData.isPublic);
-  const [previewImage, setPreviewImage] = useState(groupData.image || null);
+export default function EditGroupModal({ onClose, onUpdate }) {
+  const { groupId } = useParams();
+  const addToast = useToast();
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchGroupData = async () => {
+      try {
+        const response = await groupService.getGroupDetail(groupId);
+        if (response) {
+          setGroupName(response.groupName);
+          setGroupDescription(response.groupDescription);
+          setIsPublic(response.isPublic);
+          setImageUrl(response.imageUrl ? `https://${response.imageUrl}` : null);
+          setPreviewImage(response.imageUrl || null);
+        }
+      } catch {
+        addToast("그룹 정보를 불러오는 데 실패했습니다.");
+      }
+    };
+
+    if (groupId) {
+      fetchGroupData();
+    }
+  }, [groupId]);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -21,19 +50,41 @@ export default function EditGroupModal({ onClose, groupData, onUpdate }) {
 
   const handleRemoveImage = () => {
     setPreviewImage(null);
+    setImageFile(null);
+    setImageUrl(null);
   };
 
-  const handleSubmit = () => {
-    const updatedGroup = {
+  const handleSubmit = async () => {
+    const updatedData = {
       name: groupName,
-      description: groupDescription,
+      introduction: groupDescription,
       isPublic,
-      image: previewImage,
     };
-    onUpdate(updatedGroup); // 업데이트 함수 호출
-    onClose();
+  
+    if (imageFile) {
+      updatedData.groupImage = imageFile;
+    }
+  
+    try {
+      const response = await groupService.updateGroup(groupId, updatedData);
+  
+      if (response.status === "success") {
+        addToast("그룹 정보가 수정되었습니다!");
+        onUpdate(response.data);
+        onClose();
+      } else {
+        addToast("그룹 수정에 실패했습니다.");
+      }
+    } catch (error) {
+      addToast("그룹 수정 요청 중 오류가 발생했습니다.");
+      console.error("그룹 수정 오류:", error);
+    }
   };
-
+  
+  
+  
+  
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="w-[470px] bg-white rounded-2xl p-8 shadow-lg">
@@ -62,10 +113,10 @@ export default function EditGroupModal({ onClose, groupData, onUpdate }) {
         {/* 대표 이미지 */}
         <div className="mt-5">
           <label className="block text-sm font-medium text-black">대표 이미지</label>
-          {previewImage && (
+          {(imageUrl || previewImage) && (
             <div className="relative w-full mt-2 rounded-lg overflow-hidden border border-gray-300">
               <img 
-                src={previewImage} 
+                src={previewImage ? previewImage : imageUrl} 
                 alt="Preview" 
                 className="w-full object-cover" 
                 style={{ aspectRatio: "2 / 0.7" }} 

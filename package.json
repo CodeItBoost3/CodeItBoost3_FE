@@ -17,6 +17,7 @@
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
     "event-source-polyfill": "^1.0.31",
+    "framer-motion": "^12.4.5",
     "husky": "^9.1.7",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",

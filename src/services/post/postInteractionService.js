@@ -1,6 +1,6 @@
 import axiosInstance from "@/services/axiosInstance";
 
-/** 게시글 공감 (좋아요) 추가/취소 */
+/** 게시글 공감 (좋아요) 추가 */
 export const likePost = async (postId) => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
@@ -13,7 +13,6 @@ export const likePost = async (postId) => {
     })
     .then((response) => response.data)
     .catch((error) => {
-      console.error("게시글 공감 오류:", error);
       throw new Error(error.response?.data?.message || "게시글 공감 중 오류 발생");
     });
 };
@@ -30,16 +29,14 @@ export const checkPostPublicStatus = async (postId) => {
 };
 
 /** 스크랩 추가/삭제 */
-export const toggleScrap = async (postId, isPublic) => {
+export const toggleScrap = async (postId) => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
   return axiosInstance
-    .post(`/api/posts/${postId}/scraps`, { isPublic }, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    .post(`/api/posts/${postId}/scrap`)
     .then((response) => response.data)
     .catch((error) => {
       console.error("스크랩 추가/삭제 오류:", error);
