@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
+import PropTypes from "prop-types";
+
 import { FaTrash, FaTimes } from "react-icons/fa";
 import postService from "@/services/post/postService";
 import { useToast } from "@/hooks/useToast";
 
-export default function CreateMemory({ onClose }) {
-  const { groupId } = useParams();
+export default function CreateMemory({ onClose, groupId: propGroupId, parentComponent }) {
+  const { groupId: paramGroupId } = useParams();
+  const groupId = parentComponent === "SelectGroupModal" ? propGroupId : paramGroupId || null;
+
   const [previewImage, setPreviewImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const addToast = useToast();
@@ -68,6 +72,10 @@ export default function CreateMemory({ onClose }) {
   
   /** 게시글 작성 요청 */
 const handleCreatePost = async () => {
+  if (!groupId) {
+    addToast("올바른 그룹을 선택해주세요.");
+    return;
+  }
   if (!formData.title.trim()) {
     addToast("제목을 입력해주세요.");
     return;
@@ -240,3 +248,9 @@ const handleCreatePost = async () => {
     </div>
   );
 }
+
+CreateMemory.propTypes = {
+  groupId: PropTypes.number, 
+  onClose: PropTypes.func.isRequired,
+  parentComponent: PropTypes.string,
+};

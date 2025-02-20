@@ -89,8 +89,8 @@ function Comment({ postId, comment, onEdit, onDelete, onLike, onReply, myId }) {
             className="w-full text-gray-800 text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none"
           />
           <button onClick={() => handleReplySubmit(comment.commentId, replyContent)} className="text-darkViolet text-sm font-semibold">
-            작성
-          </button>
+          <PaperAirplaneIcon className="w-6 h-6 text-darkerGray" />
+        </button>
         </div>
       )}
 
@@ -223,7 +223,7 @@ export default function CommentSection({ postId }) {
 
   return (
     <div className="w-full max-w-[900px] mx-auto mt-6">
-      <div className="flex items-center space-x-3 border border-gray-300 rounded-full px-4 py-2">
+      <div className="flex items-center space-x-3 border border-gray-300 rounded-full px-4 py-2 focus-within:normalViolet focus-within:ring-2 focus-within:ring-normalViolet transition">
         <input
           type="text"
           placeholder="내용을 입력해주세요."
@@ -256,22 +256,22 @@ export default function CommentSection({ postId }) {
               onReply={handleReplySubmit}
               myId={myId}
             />
-            {comment.replies.length > 0 && (
-              <div className="ml-6 pl-4">
-                {comment.replies.map((reply) => (
-                  <Comment
-                    key={reply.commentId}
-                    postId={postId}
-                    comment={reply}
-                    onEdit={handleCommentEdit}
-                    onDelete={handleCommentDelete}
-                    onLike={handleCommentLike}
-                    onReply={handleReplySubmit}
-                    myId={myId}
-                  />
-                ))}
-              </div>
-            )}
+              {(comment.replies?.length || 0) > 0 && (
+                <div className="ml-6 pl-4">
+                  {comment.replies.map((reply) => (
+                    <Comment
+                      key={reply.commentId}
+                      postId={postId}
+                      comment={reply}
+                      onEdit={handleCommentEdit}
+                      onDelete={handleCommentDelete}
+                      onLike={handleCommentLike}
+                      onReply={handleReplySubmit}
+                      myId={myId}
+                    />
+                  ))}
+                </div>
+              )}
           </div>
         ))
       )}

@@ -104,6 +104,19 @@ export const getMyComments = async (page = 1, limit = 5) => {
   }).then(response => response.data);
 };
 
+/** 내가 속한 그룹 목록 조회 */
+export const getMyGroups = async (page = 1, pageSize = 5) => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
+  }
+
+  return axiosInstance.get(`/users/me/groups?page=${page}&pageSize=${pageSize}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(response => response.data);
+};
+
+
 const userService = {
   getUserInfo,
   updatePassword,
@@ -112,6 +125,7 @@ const userService = {
   deleteProfileImage,
   getMyPosts,
   getMyComments,
+  getMyGroups
 };
 
 export default userService;
