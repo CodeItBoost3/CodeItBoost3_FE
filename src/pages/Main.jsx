@@ -87,16 +87,7 @@ export default function Main() {
     fetchRecentPosts();
   }, [])
 
-  const handleLoginModal = (type) => {
-    switch (type) {
-      case "register":
-        navigate("/login");
-        break;
-      case "guest":
-        setIsLoginModalOpen(false);
-        break;
-    }
-  }
+
 
   const handleGroupRegist = () => {
     !isLogin ? setIsLoginModalOpen(true) : setIsGroupMakeModalOpen(true)
@@ -197,7 +188,7 @@ export default function Main() {
           <MemoryActions widthClass="flex-1" marginTop="mt-[7vh]" onClickGroup={handleGroupRegist}/>
         </div>
         {isGroupMakeModalOpen && <CreateGroup onClose={() => setIsGroupMakeModalOpen(false)}/>}
-        {isLoginModalOpen && <NeedLoginToGuest onClick={handleLoginModal}/>}
+        {isLoginModalOpen && <NeedLoginToGuest isLogin={isLogin}/>}
       </div>
   );
 }

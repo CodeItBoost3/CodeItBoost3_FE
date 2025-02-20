@@ -27,15 +27,15 @@ export default function MyCommentList() {
   }, [currentPage]);
 
   if (isLoading) return <LoadingSpinner size={200} />;
-
+  
   return (
     <div className="w-full h-full p-6">
       <h2 className="text-2xl font-semibold mb-4">내가 작성한 댓글</h2>
       
       {replyData.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {replyData.map((reply, index) => (
-            <Reply key={index} {...reply} />
+            <Reply key={index} title={reply.post.title} content={reply.content} />
           ))}
         </div>
       ) : (
