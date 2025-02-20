@@ -11,12 +11,46 @@ import defaultComment from "@/assets/icon/group/no-comment.svg";
 
 
 function Comment({ comment, onEdit, onDelete, onLike, myId }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(comment.content);
+
+  const handleSaveEdit = () => {
+    if (editedContent.trim() === "" || editedContent === comment.content) {
+      setIsEditing(false);
+      return;
+    }
+
+    onEdit(comment.commentId, editedContent);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSaveEdit();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+      setEditedContent(comment.content);
+    }
+  };
+
   return (
     <div className="flex items-start space-x-3 py-3 border-t border-gray-200">
       <img src={comment.profile || userProfile} alt="프로필" className="w-8 h-8 rounded-full" />
       <div className="flex-1">
         <span className="text-sm font-semibold">{comment.nickname}</span>
-        <p className="text-gray-800 text-sm mt-1">{comment.content}</p>
+        {isEditing ? (
+          <input
+            type="text"
+            className="w-full text-gray-800 text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none"
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            onBlur={handleSaveEdit} 
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+        ) : (
+          <p className="text-gray-800 text-sm mt-1">{comment.content}</p>
+        )}
 
         <div className="flex items-center gap-2 mt-2">
           <button onClick={() => onLike(comment.commentId)} className="text-darkGray hover:text-darkViolet transition">
@@ -31,14 +65,26 @@ function Comment({ comment, onEdit, onDelete, onLike, myId }) {
         </span>
         {comment.userId === myId && (
           <div className="flex gap-2 mt-1">
-            <img src={EditIcon} alt="수정" className="w-4 h-4 cursor-pointer" onClick={() => onEdit(comment)} />
-            <img src={DeleteIcon} alt="삭제" className="w-4 h-4 cursor-pointer" onClick={() => onDelete(comment.commentId)} />
+            <img 
+              src={EditIcon} 
+              alt="수정" 
+              className="w-4 h-4 cursor-pointer" 
+              onClick={() => setIsEditing(true)} 
+            />
+            <img 
+              src={DeleteIcon} 
+              alt="삭제" 
+              className="w-4 h-4 cursor-pointer" 
+              onClick={() => onDelete(comment.commentId)} 
+            />
           </div>
         )}
       </div>
     </div>
   );
 }
+
+
 
 export default function CommentSection({ postId }) {
   const addToast = useToast();
@@ -95,26 +141,26 @@ const handleCommentSubmit = async () => {
     addToast("댓글 작성 중 오류가 발생했습니다.");
   }
 };
-const handleKeyDown = (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault(); 
-    handleCommentSubmit();
+
+const handleCommentEdit = async (commentId, updatedContent) => {
+  try {
+    await commentService.updateComment(commentId, updatedContent);
+    setComments((prevComments) =>
+      prevComments.map((c) => (c.commentId === commentId ? { ...c, content: updatedContent } : c))
+    );
+    addToast("댓글이 수정되었습니다.");
+  } catch {
+    addToast("댓글 수정 중 오류가 발생했습니다.");
   }
 };
 
-  const handleCommentEdit = async (comment) => {
-    const updatedContent = prompt("수정할 내용을 입력하세요:", comment.content);
-    if (!updatedContent) return;
+  
+const handleKeyDown = (e) => {
+  if (e.key === "Enter") {
+    handleCommentSubmit(); 
+  }
+};
 
-    try {
-      await commentService.updateComment(comment.commentId, updatedContent);
-      setComments((prevComments) =>
-        prevComments.map((c) => (c.commentId === comment.commentId ? { ...c, content: updatedContent } : c))
-      );
-    } catch {
-      addToast("댓글 수정 중 오류가 발생했습니다.");
-    }
-  };
 
   const handleCommentDelete = async (commentId) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
