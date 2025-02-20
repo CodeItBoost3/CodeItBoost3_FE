@@ -113,23 +113,23 @@ export default function EditMemory({ post, onClose, onUpdate }) {
 
         <div className="flex flex-col md:flex-row gap-6 w-full">
           
-          <div className="w-full md:w-[365px] flex flex-col">
+          <div className="w-full md:w-[50%] flex flex-col">
             <div className="flex flex-col gap-6">
               
               <div className="flex flex-col gap-2">
-                <label className="text-black text-[13px] font-medium">제목</label>
+                <label className="text-black text-[16px] font-medium">제목</label>
                 <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
+                  className="w-full h-10 px-[10px] border border-mediumGray rounded-md text-[14px] text-normalGray"
                   placeholder="추억 글 이름"
                 />
               </div>
 
               <div className="flex flex-col">
-                <label className="text-black text-[13px] font-medium">대표 이미지</label>
+                <label className="text-black text-[16px] font-medium">대표 이미지</label>
                 <div className="mt-2">
                   {previewImage && (
                     <div className="relative w-full mt-1 rounded-lg overflow-hidden border border-gray-300">
@@ -157,30 +157,31 @@ export default function EditMemory({ post, onClose, onUpdate }) {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-black text-[13px] font-medium">본문</label>
+                <label className="text-black text-[16px] font-medium">본문</label>
                 <textarea
                   name="content"
                   value={formData.content}
                   onChange={handleChange}
-                  className="w-full h-[98px] px-[10px] border border-mediumGray rounded-[10px] text-[10px] text-normalGray"
+                  className="w-full h-[98px] px-[10px] border border-mediumGray rounded-[10px] text-[14px] text-normalGray p-2"
                   placeholder="본문 내용을 입력해 주세요."
                 />
               </div>
             </div>
           </div>
 
-          <div className="w-full md:w-[365px] flex flex-col">
+          <div className="w-full md:w-[50%] flex flex-col">
             <div className="flex flex-col space-y-5">
               
               <div className="flex flex-col">
-                <div className="flex justify-between items-center">
-                  <span className="text-black text-[13px] font-medium">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-black text-[16px] font-medium">
                     태그 <span className="text-mediumGray">(최대 10개)</span>
                   </span>
+                  <span className="text-darkerGray text-xs">*태그 클릭 시 해당 태그가 삭제됩니다.</span>
                 </div>
                 <input
                   type="text"
-                  className="w-full h-[28px] px-[10px] border border-mediumGray rounded-md text-[10px] text-normalGray"
+                  className="w-full h-10 px-[10px] border border-mediumGray rounded-md text-[14px] text-normalGray placeholder:text-normalGray"
                   placeholder="Enter를 누르면 태그가 등록됩니다."
                   onKeyDown={handleTagKeyDown}
                 />
@@ -199,7 +200,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
               </div>
 
               <div className="flex flex-col gap-[9.87px]">
-                <label className="text-black text-[13.17px] font-medium">
+                <label className="text-black text-[16px] font-medium">
                   장소
                 </label>
                 <input
@@ -207,13 +208,13 @@ export default function EditMemory({ post, onClose, onUpdate }) {
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full h-[27.65px] px-[10.53px] py-[6.58px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
+                  className="w-full h-10 px-[10.53px] py-[6.58px] border border-normalGray rounded-md text-[14px] text-normalGray"
                   placeholder="장소를 입력해 주세요."
                 />
               </div>
 
               <div className="flex flex-col gap-[9.87px]">
-                <label className="text-black text-[13.17px] font-medium">
+                <label className="text-black text-[16px] font-medium">
                   추억의 순간
                 </label>
                 <input
@@ -221,7 +222,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
                   name="memoryDate"
                   value={formData.memoryDate}
                   onChange={handleChange}
-                  className="w-[136.26px] h-[28.31px] px-[10.53px] py-[9.87px] border border-normalGray rounded-md text-[10.53px] text-normalGray"
+                  className="w-[136.26px] h-10 px-[10.53px] py-[9.87px] border border-normalGray rounded-md text-[14px] text-normalGray"
                 />
               </div>
             </div>
