@@ -222,18 +222,29 @@ export default function GroupDetail() {
     }
   };
   
+  const decodeImageUrl = (url) => {
+    try {
+      return decodeURIComponent(url);
+    } catch (error) {
+      console.error("URL 디코딩 실패:", error);
+      return url; 
+    }
+  };
+  
+  const decodedImageUrl = group?.imageUrl ? decodeImageUrl(group.imageUrl) : null;
+
   
   return (
     <div className="w-full max-w-[1200px] mx-auto py-3">
       <div className="flex flex-col md:flex-row p-6 relative">
         <img 
           className="w-[180px] h-[180px] rounded-lg object-cover"
-          src={group?.imageUrl ? `https://${group.imageUrl}` : defaultImage} 
+          src={group?.imageUrl ? `https://d1up383l0okfvw.cloudfront.net/${decodedImageUrl}` : defaultImage} 
           alt="그룹 이미지" 
         />
           {isAdmin && group?.imageUrl && (
             <button
-              className="absolute top-4 left-[200px] bg-red-500 text-white p-2 rounded-full flex items-center justify-center"
+              className="absolute top-4 left-[180px] bg-red-200 text-white p-1 rounded-full flex items-center justify-center"
               onClick={handleDeleteGroupImage}
             >
               <img src={DeleteIcon} alt="이미지 삭제" className="w-5 h-5" />

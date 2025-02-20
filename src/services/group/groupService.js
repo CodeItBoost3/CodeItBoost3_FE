@@ -83,12 +83,27 @@ export const updateGroup = async (groupId, updatedData) => {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(updatedData));
+
+  if (updatedData.groupImage) {
+    formData.append("groupImage", updatedData.groupImage);
+  }
+
+  for (let pair of formData.entries()) {
+    console.log("   ", pair[0], pair[1]);
+  }
+
   return axiosInstance
-    .patch(`/api/groups/${groupId}`, updatedData, {
-      headers: { Authorization: `Bearer ${token}` },
+    .patch(`/api/groups/${groupId}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     })
     .then((response) => response.data);
 };
+
 
 /** 그룹 삭제 */
 export const deleteGroup = async (groupId) => {

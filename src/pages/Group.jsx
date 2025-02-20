@@ -91,7 +91,8 @@ export default function Group() {
   
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
-      addToast("검색어를 입력하세요.");
+      setIsSearching(false);
+      setSearchResult([]);
       return;
     }
   
@@ -100,19 +101,17 @@ export default function Group() {
   
     try {
       const response = await groupService.searchGroups(searchTerm);
-      console.log("[DEBUG] 검색 API 응답:", response);
   
       if (response.status === "success") {
-        setSearchResult(response.data || []); 
+        const filteredResults = response.data.filter(group => group.isPublic === isPublic);
+        setSearchResult(filteredResults || []); 
       } else {
         throw new Error("검색 실패");
       }
-    } catch (error) {
-      console.error("[ERROR] 그룹 검색 실패:", error);
+    } catch {
       addToast("검색 결과를 불러오는 중 오류가 발생했습니다.");
     }
   };
-  
   
 
   const resetSearch = () => {
@@ -172,7 +171,19 @@ export default function Group() {
       addToast("비밀번호 검증 중 오류가 발생했습니다.");
     }
   };
+  const decodeImageUrl = (url) => {
+    if (!url) return null;
+    
+    try {
+      const decodedUrl = decodeURIComponent(url);
+      return `https://d1up383l0okfvw.cloudfront.net/${decodedUrl}`;
+    } catch {
+      return `https://d1up383l0okfvw.cloudfront.net/${url}`;
+    }
+  };
   
+  
+
   
   return (
     <div className="max-w-[95%] w-full h-full pt-3 pb-7">
@@ -218,7 +229,7 @@ export default function Group() {
               key={group.groupId}
               title={group.groupName}
               description={group.description}
-              image={group.imageUrl}
+              image={decodeImageUrl(group.imageUrl)}
               picturecount={group.postCount}
               emotioncount={group.likeCount}
               badgecount={group.badgeCount}

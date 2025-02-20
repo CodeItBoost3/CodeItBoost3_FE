@@ -5,13 +5,9 @@ import { FaTrash, FaEdit } from "react-icons/fa";
 import { useToast } from "@/hooks/useToast";
 import groupService from "@/services/group/groupService";
 
-
 export default function EditGroupModal({ onClose, onUpdate }) {
   const { groupId } = useParams();
   const addToast = useToast();
-  const [initialGroupName, setInitialGroupName] = useState("");
-  const [initialGroupDescription, setInitialGroupDescription] = useState("");
-  const [initialIsPublic, setInitialIsPublic] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
@@ -29,27 +25,21 @@ export default function EditGroupModal({ onClose, onUpdate }) {
           setIsPublic(response.isPublic);
           setImageUrl(response.imageUrl ? `https://${response.imageUrl}` : null);
           setPreviewImage(response.imageUrl || null);
-  
-          setInitialGroupName(response.groupName);
-          setInitialGroupDescription(response.groupDescription);
-          setInitialIsPublic(response.isPublic);
         }
       } catch {
         addToast("그룹 정보를 불러오는 데 실패했습니다.");
       }
     };
-  
+
     if (groupId) {
       fetchGroupData();
     }
   }, [groupId]);
-  
 
-  
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setImageFile(file); 
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -57,29 +47,27 @@ export default function EditGroupModal({ onClose, onUpdate }) {
       reader.readAsDataURL(file);
     }
   };
-  
 
   const handleRemoveImage = () => {
     setPreviewImage(null);
     setImageFile(null);
-    setImageUrl(null); 
+    setImageUrl(null);
   };
-  
 
   const handleSubmit = async () => {
-    const formData = new FormData();
-  
-    if (groupName !== initialGroupName) formData.append("name", groupName);
-    if (groupDescription !== initialGroupDescription) formData.append("introduction", groupDescription);
-    if (isPublic !== initialIsPublic) formData.append("isPublic", isPublic);
+    const updatedData = {
+      name: groupName,
+      introduction: groupDescription,
+      isPublic,
+    };
   
     if (imageFile) {
-      formData.append("groupImage", imageFile);
+      updatedData.groupImage = imageFile;
     }
   
     try {
-      const response = await groupService.updateGroup(groupId, formData);
-      
+      const response = await groupService.updateGroup(groupId, updatedData);
+  
       if (response.status === "success") {
         addToast("그룹 정보가 수정되었습니다!");
         onUpdate(response.data);
@@ -95,7 +83,8 @@ export default function EditGroupModal({ onClose, onUpdate }) {
   
   
   
-
+  
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="w-[470px] bg-white rounded-2xl p-8 shadow-lg">
@@ -125,9 +114,9 @@ export default function EditGroupModal({ onClose, onUpdate }) {
         <div className="mt-5">
           <label className="block text-sm font-medium text-black">대표 이미지</label>
           {(imageUrl || previewImage) && (
-        <div className="relative w-full mt-2 rounded-lg overflow-hidden border border-gray-300">
-          <img 
-            src={previewImage ? previewImage : imageUrl} 
+            <div className="relative w-full mt-2 rounded-lg overflow-hidden border border-gray-300">
+              <img 
+                src={previewImage ? previewImage : imageUrl} 
                 alt="Preview" 
                 className="w-full object-cover" 
                 style={{ aspectRatio: "2 / 0.7" }} 
