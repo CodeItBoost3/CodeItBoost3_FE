@@ -29,6 +29,7 @@ export default function Main() {
   const navigate = useNavigate();
   const addToast = useToast();
 
+  console.log(recentPosts)
   /** 사용자 정보 조회 **/
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -129,8 +130,8 @@ export default function Main() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {groupList.map((group) => (
                       <PublicGroupCard
-                          key={group.groupId}
                           id={group.groupId}
+                          key={group.groupId}
                           title={group.groupName}
                           description={group.description}
                           image={group.image}
@@ -174,7 +175,7 @@ export default function Main() {
               {recentPosts.length > 0 ? (
                   recentPosts.map((item, idx) => (
                       <MemoryCard
-                          key={item.id}
+                          key={idx}
                           index={idx}
                           title={item.title}
                           date={dayjs(item.createdAt).format("YYYY.MM.DD")}

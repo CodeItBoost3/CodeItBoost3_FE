@@ -1,6 +1,9 @@
 import {useEffect, useState} from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+
 import {useToast} from "@/hooks/useToast.js";
+
 import scrapService from "@/services/scrap/scrapService.js";
 
 import NoScrapIcon from "@/assets/icon/scrap/no-scrap.svg";
@@ -51,14 +54,19 @@ export default function Scrap () {
   useEffect(() => {
     const fetchScrapList = async() => {
       try{
-        const result = await scrapService.getScrapList({
+        const response = await scrapService.getScrapList({
           sortBy,
           keyword: searchTerm,
           page: currentPage,
         });
 
-        setMemories(result.data || []);
-        setTotalPages(result.data.totalPages);
+        if (response.status === "success"){
+          setMemories(response.data.data || []);
+          setTotalPages(response.data.totalPages);
+        } else{
+          throw new Error("스크랩한 추억글 조회 실패");
+        }
+
       } catch{
         addToast("스크랩한 추억글 조회에 실패했습니다.");
       }
@@ -125,12 +133,19 @@ export default function Scrap () {
       <div className="w-full mt-3 py-3">
         {memories.length > 0 ? (
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {memories.map((memory, index) =>
+              {memories.map((memory) =>
                   <PublicPostCard
-                      key={index}
-                      id={index + 1}
-                      groupId={1}
-                      {...memory}
+                      key={memory.postId}
+                      id={memory.postId}
+                      groupId={memory.post?.groupId}
+                      title={memory.post?.title || "제목 없음"}
+                      tag={memory.post?.tag.length ? memory.post?.tag : ["태그 없음"]}
+                      moment={dayjs(memory.post?.moment).format('YYYY-MM-DD')}
+                      author={memory.post?.nickname || "알 수 없음"}
+                      imageUrl={memory.post?.imageUrl ? `https://${memory.post.imageUrl}` : null}
+                      location={memory.post?.location || "장소 정보 없음"}
+                      likeCount={memory.post?.likeCount ?? 0}
+                      commentCount={memory.post?.commentCount ?? 0}
                   />)}
             </div>
         ):(

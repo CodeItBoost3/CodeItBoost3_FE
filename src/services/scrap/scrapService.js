@@ -47,7 +47,7 @@ export const getScrapList = async ({ page = 1, pageSize = 10, sortBy = "latest",
         postId,
       },
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error("스크랩 목록 조회 오류:", error);
     throw new Error(error.response?.data?.message || "스크랩 목록 조회 중 오류 발생");
