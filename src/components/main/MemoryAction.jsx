@@ -1,9 +1,27 @@
 import { useState } from "react";
+import {useNavigate} from "react-router-dom";
 import LogoImage from "@/assets/image/logo-image.svg";
 import SelectGroupModal from "@/components/modal/SelectGroupModal";
+import NeedLoginToGuest from "@/components/modal/NeedLoginToGuest.jsx";
+import CreateGroup from "@/components/modal/CreateGroup.jsx";
 
-export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0", onClickGroup }) {
+export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0", isLogin }) {
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showMemoryModal, setShowMemoryModal] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleLoginModal = (type) => {
+    switch (type) {
+      case "register":
+        navigate("/login");
+        break;
+      case "guest":
+        setShowLoginModal(false);
+        break;
+    }
+  }
 
   return (
     <div className={`${widthClass} ${marginTop} h-auto px-3 py-6 bg-[#f4dffb]/20 rounded-lg border border-normalGray flex flex-col justify-between`}>
@@ -21,7 +39,7 @@ export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0
       </div>
 
       <div className="flex flex-col gap-3 w-full">
-        <div className="bg-white rounded-md p-3 shadow-sm cursor-pointer" onClick={onClickGroup}>
+        <div className="bg-white rounded-md p-3 shadow-sm cursor-pointer" onClick={() => isLogin ? setShowLoginModal(true) : setShowCreateGroupModal(true)}>
           <span className="text-black text-sm font-normal">
             새로운 <span className="text-darkViolet">조각 그룹</span> 등록하기
           </span>
@@ -38,6 +56,12 @@ export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0
             onClose={() => setShowMemoryModal(false)} 
             parentComponent="Main" 
           />
+        )}
+        {showLoginModal && (
+            <NeedLoginToGuest onClick={handleLoginModal} parentComponent="Main"/>
+        )}
+        {showCreateGroupModal && (
+            <CreateGroup onClose={() => setShowCreateGroupModal(false)} parentComponent="Main"/>
         )}
       </div>
     </div>
