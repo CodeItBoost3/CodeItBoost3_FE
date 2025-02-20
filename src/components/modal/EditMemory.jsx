@@ -101,7 +101,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
   
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-10 z-20">
-      <div className="relative w-[90%] md:w-[65%] min-h-[70%] h-auto px-6 md:px-[65px] pt-[40px] pb-[70px] bg-white rounded-[20px] shadow-md border border-darkWhite flex flex-col justify-start items-center overflow-auto">
+      <div className="relative w-[90%] md:w-[65%] min-h-[50%] h-auto px-6 md:px-[65px] pt-[40px] pb-[70px] bg-white rounded-[20px] shadow-md border border-darkWhite flex flex-col justify-start items-center overflow-auto">
 
         <button onClick={onClose} className="absolute top-4 right-4 text-darkGray hover:text-darkGray-hover active:text-darkGray-active">
           <FaTimes size={20} />
@@ -123,7 +123,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full h-10 px-[10px] border border-mediumGray rounded-md text-[14px] text-normalGray"
+                  className="focus:outline-normalViolet h-10 px-[10px] border border-mediumGray rounded-md text-[14px] text-black placeholder:text-normalGray"
                   placeholder="추억 글 이름"
                 />
               </div>
@@ -162,7 +162,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
                   name="content"
                   value={formData.content}
                   onChange={handleChange}
-                  className="w-full h-[98px] px-[10px] border border-mediumGray rounded-[10px] text-[14px] text-normalGray p-2"
+                  className="focus:outline-normalViolet w-full h-[98px] px-[10px] border border-mediumGray rounded-[10px] text-[14px] text-black placeholder:text-normalGray p-2"
                   placeholder="본문 내용을 입력해 주세요."
                 />
               </div>
@@ -181,7 +181,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
                 </div>
                 <input
                   type="text"
-                  className="w-full h-10 px-[10px] border border-mediumGray rounded-md text-[14px] text-normalGray placeholder:text-normalGray"
+                  className="focus:outline-normalViolet w-full h-10 px-[10px] border border-mediumGray rounded-md text-[14px] text-black placeholder:text-normalGray"
                   placeholder="Enter를 누르면 태그가 등록됩니다."
                   onKeyDown={handleTagKeyDown}
                 />
@@ -208,7 +208,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full h-10 px-[10.53px] py-[6.58px] border border-normalGray rounded-md text-[14px] text-normalGray"
+                  className="focus:outline-normalViolet w-full h-10 px-[10.53px] py-[6.58px] border border-mediumGray rounded-md text-[14px] text-black placeholder:text-normalGray"
                   placeholder="장소를 입력해 주세요."
                 />
               </div>
@@ -222,7 +222,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
                   name="memoryDate"
                   value={formData.memoryDate}
                   onChange={handleChange}
-                  className="w-[136.26px] h-10 px-[10.53px] py-[9.87px] border border-normalGray rounded-md text-[14px] text-normalGray"
+                  className="focus:outline-normalViolet w-[136.26px] h-10 px-[10.53px] py-[9.87px] border border-mediumGray rounded-md text-[14px] text-black placeholder:text-normalGray"
                 />
               </div>
             </div>
