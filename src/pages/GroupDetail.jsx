@@ -27,7 +27,7 @@ export default function GroupDetail() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "latest");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -108,8 +108,8 @@ export default function GroupDetail() {
         groupId,
         page: currentPage,
         pageSize: 10,
-        sortBy,
-        keyword: searchTerm.trim(),
+        sortBy, // ✅ 정렬 옵션 적용
+        keyword: searchTerm.trim(), // ✅ 검색어 반영
         isPublic: tabName === "Public",
       });
   
@@ -138,7 +138,7 @@ export default function GroupDetail() {
       addToast("게시글 목록 조회에 실패했습니다.");
     }
   };
-
+  
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
   }, [searchParams]);
@@ -271,12 +271,14 @@ const handleLikeGroup = async () => {
   }
 };
   
-  const handleSelect = (selectedValue) => {
-    if (selectedValue !== sortBy) {
-      setSortBy(selectedValue);
-      setSearchParams({ sortBy: selectedValue, group: tabName }, { replace: true });
-    }
-  };
+const handleSelect = (selectedValue) => {
+  if (selectedValue !== sortBy) {
+    setSortBy(selectedValue);
+    setSearchParams({ sortBy: selectedValue, group: tabName }, { replace: true });
+
+    fetchPosts();
+  }
+};
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -357,6 +359,10 @@ const handleLikeGroup = async () => {
   
   const decodedImageUrl = group?.imageUrl ? decodeImageUrl(group.imageUrl) : null;
 
+  useEffect(() => {
+    fetchPosts();
+  }, [groupId, sortBy, searchTerm, isSearching]);
+  
   
   return (
     <div className="w-full max-w-full mx-auto py-3">
