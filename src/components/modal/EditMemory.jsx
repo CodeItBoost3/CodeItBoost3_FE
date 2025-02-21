@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 export default function EditMemory({ post, onClose, onUpdate }) {
   const addToast = useToast();
   const [previewImage, setPreviewImage] = useState(null);
+  const [previewImageURL, setPreviewImageURL] = useState(null); 
   const [formData, setFormData] = useState({
     nickname: "",
     title: "",
@@ -25,22 +26,26 @@ export default function EditMemory({ post, onClose, onUpdate }) {
         memoryDate: post.moment?.split("T")[0] || "",
         content: post.content || "",
       });
+  
       if (post.imageUrl) {
-        setPreviewImage(`https://${post.imageUrl}`);
+        setPreviewImageURL(`https://${post.imageUrl}`);
       }
     }
   }, [post]);
   
+  
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      setPreviewImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImage(reader.result);
+        setPreviewImageURL(reader.result); 
       };
       reader.readAsDataURL(file);
     }
   };
+  
 
   const handleRemoveImage = () => {
     setPreviewImage(null);
@@ -85,7 +90,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
     formDataToSend.append("location", formData.location);
     formDataToSend.append("moment", formData.memoryDate); 
   
-    if (previewImage && previewImage instanceof File) {
+    if (previewImage) {
       formDataToSend.append("image", previewImage);
     }
   
@@ -93,6 +98,7 @@ export default function EditMemory({ post, onClose, onUpdate }) {
       const updatedPost = await postService.updatePost(post.postId, formDataToSend);
       onUpdate(updatedPost.data); 
       onClose();
+      addToast("게시글이 수정되었습니다!");
     } catch {
       addToast("게시글 수정에 실패했습니다.");
     }
@@ -131,10 +137,10 @@ export default function EditMemory({ post, onClose, onUpdate }) {
               <div className="flex flex-col">
                 <label className="text-black text-[16px] font-medium">대표 이미지</label>
                 <div className="mt-2">
-                  {previewImage && (
+                  {previewImageURL && (
                     <div className="relative w-full mt-1 rounded-lg overflow-hidden border border-gray-300">
                       <img 
-                        src={previewImage} 
+                        src={previewImageURL} 
                         alt="Preview" 
                         className="w-full object-cover" 
                         style={{ aspectRatio: "2 / 0.7" }}
