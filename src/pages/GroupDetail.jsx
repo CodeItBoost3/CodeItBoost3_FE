@@ -3,6 +3,7 @@ import { IoRefresh } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 
 import Alert from '@/components/modal/Alert';
 import DeleteIcon from "@/assets/icon/mypage/delete.svg";
@@ -70,56 +71,53 @@ export default function GroupDetail() {
     return "🏆";
   };
   
-
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const data = await userService.getUserInfo();
         const userId = data.data.id;
         setMyId(userId);
-        
+  
         if (group?.members) {
           const member = group.members.find((member) => member.userId === userId);
-          if (member) {
-            setIsMember(true);
-            setIsAdmin(member.role === "ADMIN");
-          } else {
-            setIsMember(false);
-          }
+          setIsMember(!!member);
+          setIsAdmin(member?.role === "ADMIN"); // ✅ 어드민 여부 판별
         }
       } catch {
         addToast("사용자 정보를 불러오는 중 오류가 발생했습니다.");
       }
     };
   
-    fetchUserInfo();
-  }, [group]);
-
-  useEffect(() => {
-    const fetchGroupDetail = async () => {
-      try {
-        const data = await groupService.getGroupDetail(groupId);
-        if (!data) {
-          addToast("해당 그룹을 찾을 수 없습니다.");
-          return;
-        }
-        setGroup(data);
-      } catch {
-        addToast("그룹 상세 조회에 실패했습니다.");
-      }
-    };
-    fetchGroupDetail();
-    fetchPosts();
-  }, [groupId, publicMemories]);
+    if (group) {
+      fetchUserInfo();
+    }
+  }, [group]); // ✅ `group`이 변경될 때마다 실행
   
-  const fetchPosts = async () => {
+  const fetchGroupDetail = useCallback(async () => {
+    try {
+      const data = await groupService.getGroupDetail(groupId);
+      if (!data) {
+        addToast("해당 그룹을 찾을 수 없습니다.");
+        return;
+      }
+      setGroup(data);
+    } catch {
+      addToast("그룹 상세 조회에 실패했습니다.");
+    }
+  }, [groupId, addToast]);
+  
+  const fetchPosts = useCallback(async () => {
+    if (!groupId) return;
+    
+    setSearching(true);
+    
     try {
       const postList = await postService.getPostList({
         groupId,
         page: currentPage,
         pageSize: 10,
-        sortBy, // ✅ 정렬 옵션 적용
-        keyword: searchTerm.trim(), // ✅ 검색어 반영
+        sortBy,
+        keyword: searchTerm.trim(), 
         isPublic: tabName === "Public",
       });
   
@@ -146,27 +144,30 @@ export default function GroupDetail() {
       }
     } catch {
       addToast("게시글 목록 조회에 실패했습니다.");
+    } finally {
+      setSearching(false);
     }
-  };
+  }, [groupId, currentPage, sortBy, searchTerm, tabName, addToast]);
   
   useEffect(() => {
-    setSortBy(searchParams.get("sortBy") || "mostLiked");
-  }, [searchParams]);
+    fetchGroupDetail();
+    fetchPosts();
+  }, [fetchGroupDetail, fetchPosts]);
   
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     if (!searchTerm.trim()) {
       setIsSearching(false);
       setSearching(false);
       setCurrentPage(1);
-      setPublicMemories([]); 
-      fetchPosts(); 
+      setPublicMemories([]);
+      fetchPosts();
       return;
     }
   
     setIsSearching(true);
-  };
-
-  const handleRefresh = async () => {
+  }, [searchTerm, fetchPosts]);
+  
+  const handleRefresh = useCallback(async () => {
     setSearchTerm(""); 
     setCurrentPage(1);
     setSortBy("mostLiked");
@@ -174,44 +175,15 @@ export default function GroupDetail() {
   
     setIsSearching(false);
     setSearching(false);
-    setPublicMemories([]); 
+    setPublicMemories([]);
+    
+    await fetchPosts();
+  }, [fetchPosts, setSearchParams, tabName]);
   
-    try {
-      const postList = await postService.getPostList({
-        groupId,
-        page: 1,
-        pageSize: 10,
-        sortBy: "mostLiked",
-        keyword: "", 
-        isPublic: tabName === "Public",
-      });
-  
-      if (postList.status === "success" && postList.data) {
-        setTotalPages(postList.data.totalPages);
-        setPublicMemories(
-          postList.data.data.map((post) => ({
-            id: post.postId,
-            groupId: post.groupId,
-            author: post.author?.nickname || "알 수 없음",
-            title: post.title || "제목 없음",
-            content: post.content || "내용 없음",
-            imageUrl: post.imageUrl ? `https://${post.imageUrl}` : null,
-            location: post.location || "장소 정보 없음",
-            moment: new Date(post.moment).toLocaleDateString("ko-KR"),
-            createdAt: new Date(post.createdAt).toLocaleDateString("ko-KR"),
-            likeCount: post.likeCount ?? 0,
-            commentCount: post.commentCount ?? 0,
-            tag: post.tag?.length ? post.tag : ["태그 없음"],
-          }))
-        );
-      } else {
-        setPublicMemories([]);
-      }
-    } catch {
-      addToast("게시글 목록을 불러오는 데 실패했습니다.");
-    }
-  };
-  
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
+
 
 useEffect(() => {
   if (!groupId || !isSearching) return;
@@ -290,9 +262,6 @@ const handleSelect = (selectedValue) => {
   }
 };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
 
   const handleMoreClick = (event) => {
     event.preventDefault();
@@ -308,11 +277,13 @@ const handleSelect = (selectedValue) => {
     try {
       await groupService.deleteGroup(groupId);
       addToast("그룹이 삭제되었습니다.");
-      navigate(`/group`); 
+      navigate(`/group`);
+      fetchPosts(); 
     } catch {
       console.log("게시글 삭제에 실패했습니다.");
     }
   };
+  
 
   const handleJoinGroup = async () => {
     try {
@@ -385,9 +356,6 @@ const handleSelect = (selectedValue) => {
   
   const decodedImageUrl = group?.imageUrl ? decodeImageUrl(group.imageUrl) : null;
 
-  useEffect(() => {
-    fetchPosts();
-  }, [groupId, sortBy, searchTerm, isSearching]);
   
   
   return (
@@ -478,15 +446,21 @@ const handleSelect = (selectedValue) => {
 
       {isModalOpen && <CreateMemory onClose={() => setIsModalOpen(false)} />}
       {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} itemId={group.groupId} onEdit={() => setShowEditGroup(true)} onDelete={handleDeleteGroup}/>}
-      {showEditGroup && <EditGroup onUpdate={(updatedGroup) => setGroup(updatedGroup)} onClose={() => setShowEditGroup(false)} />}
-        
+      {showEditGroup && <EditGroup 
+        onUpdate={(updatedGroup) => {
+          setGroup(updatedGroup);
+          fetchGroupDetail();
+        }} 
+        onClose={() => setShowEditGroup(false)} 
+      />}
+
       <div className="my-[70px] border-t border-gray-200"></div>
 
       <div>
                 
       <div className="flex gap-3 justify-start items-center mb-3">
           <h2 className="text-2xl font-semibold text-black">
-            <span className="text-darkViolet">달봉이네 가족</span>의 추억 목록
+            <span className="text-darkViolet">{group?.groupName || "그룹 이름"}</span>의 추억 목록
           </h2>
           <button onClick={() => setIsModalOpen(true)}>
             <img src={AddIcon} alt="추억 추가" />
