@@ -18,6 +18,7 @@ import LogoImage from "@/assets/image/logo-image.svg";
 import moreIcon from "@/assets/icon/group/more.svg";
 import ScrapIcon from "@/assets/icon/group/bookmark-fill.svg?react";
 import postInteractionService from "@/services/post/postInteractionService";
+import { useCallback } from "react";
 
 export default function MemoryPost() {
   const { groupId, postId } = useParams();
@@ -31,6 +32,41 @@ export default function MemoryPost() {
   const [showEditMemory, setShowEditMemory] = useState(false);
   const [post, setPost] = useState(null);
   const [comments] = useState("");
+
+// ✅ 게시글 상세 정보 가져오기 (useCallback 적용)
+const fetchPostDetail = useCallback(async () => {
+  if (!postId) return;
+  try {
+    const response = await postService.getPostDetail(postId);
+    if (response.status === "success" && response.data) {
+      setPost(response.data);
+    }
+  } catch {
+    addToast("게시글 상세 조회에 실패했습니다.");
+  }
+}, [postId, addToast]);
+
+useEffect(() => {
+  fetchPostDetail();
+}, [fetchPostDetail]);
+
+// ✅ 스크랩 상태 조회 (useCallback 적용)
+const fetchScrapStatus = useCallback(async () => {
+  if (!postId) return;
+  try {
+    const response = await scrapService.checkScrapStatus(postId);
+    setIsBookmark(response.data.isScrapped);
+  } catch {
+    addToast("스크랩 여부 조회에 실패했습니다.");
+  }
+}, [postId, addToast]);
+
+useEffect(() => {
+  fetchScrapStatus();
+}, [fetchScrapStatus]);
+
+
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -170,11 +206,12 @@ export default function MemoryPost() {
               onClick={handleBookMark}
               className={`${iconStyle} ${isBookmark ? "fill-normalViolet stroke-normalViolet" : " stroke-darkGray-active [&>path:first-child]:fill-none"}`}
           />
-        {currentUser && post.author.nickname === currentUser.nickname && (
+        {currentUser && post?.author?.nickname === currentUser.nickname && (
           <button>
             <img src={moreIcon} alt="더보기" className="w-6 h-6" onClick={handleMoreClick} />
           </button>
         )}
+
         </div>
         {isMoreOpen &&
           <MoreOptionsModal 
