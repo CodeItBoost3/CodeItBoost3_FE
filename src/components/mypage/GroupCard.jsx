@@ -4,6 +4,7 @@ import userService from "@/services/user/userService";
 import { useToast } from "@/hooks/useToast";
 import DummyImg from "@/assets/image/profile-basic2.svg";
 import useValidateLogin from "@/hooks/useValidateLogin.js";
+import {decodeImageUrl} from "@/utils/decodeImageUrl.js";
 
 export default function GroupCard() {
   const [groups, setGroups] = useState([]);
@@ -14,10 +15,11 @@ export default function GroupCard() {
     const fetchGroups = async () => {
       try {
         const response = await userService.getMyGroups();
+        console.log(response);
         const groupList = response.data.groups.map((item) => ({
           id: item.group.groupId,
           name: item.group.groupName,
-          image: item.group.imageUrl || DummyImg,
+          image: item.group.imageUrl ? `${decodeImageUrl(item.group.imageUrl)}` : DummyImg,
         }));
 
         setGroups(groupList);
