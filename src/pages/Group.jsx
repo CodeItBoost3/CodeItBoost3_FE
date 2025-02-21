@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { IoRefresh } from "react-icons/io5";
@@ -65,34 +65,33 @@ export default function Group() {
     fetchUserInfo();
   }, []);
   
-  useEffect(() => {
-    if (isSearching) return;
-
-    const fetchGroupList = async () => {
-      try {
-        const response = await groupService.getGroupList({
-          type: isPublic ? "public" : "private",
-          sortBy,
-          keyword: "",
-          page: currentPage,
-        });
-
-        if (response.status === "success") {
-          setGroupData(response.data.groups || []);
-          setTotalPages(response.data.totalPage);
-        } else {
-          throw new Error("그룹 목록 조회 실패");
-        }
-      } catch {
-        if(isLogin) addToast("그룹 목록 조회에 실패했습니다.");
+  const fetchGroupList = useCallback(async () => {
+    if (isSearching) return; // 검색 중이면 요청하지 않음
+  
+    try {
+      const response = await groupService.getGroupList({
+        type: isPublic ? "public" : "private",
+        sortBy,
+        keyword: "",
+        page: currentPage,
+      });
+  
+      if (response.status === "success") {
+        setGroupData(response.data.groups || []);
+        setTotalPages(response.data.totalPage);
       }
-    };
-
+    } catch {
+      addToast("그룹 목록 조회에 실패했습니다.");
+    }
+  }, [isPublic, sortBy, currentPage, isSearching, addToast]);
+  
+  useEffect(() => {
     fetchGroupList();
-  }, [isPublic, sortBy, currentPage, isSearching, groupData]);
+  }, [fetchGroupList]);
+  
 
   useEffect(() => {
-    setSortBy(searchParams.get("sortBy") || "mostLiked");
+    setSortBy(searchParams.get("sortBy") || "latest");
   }, [searchParams]);
 
   const handleLoginModal = (type) => {

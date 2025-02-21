@@ -33,7 +33,6 @@ export default function MemoryPost() {
   const [post, setPost] = useState(null);
   const [comments] = useState("");
 
-// ✅ 게시글 상세 정보 가져오기 (useCallback 적용)
 const fetchPostDetail = useCallback(async () => {
   if (!postId) return;
   try {
@@ -50,7 +49,6 @@ useEffect(() => {
   fetchPostDetail();
 }, [fetchPostDetail]);
 
-// ✅ 스크랩 상태 조회 (useCallback 적용)
 const fetchScrapStatus = useCallback(async () => {
   if (!postId) return;
   try {
@@ -179,7 +177,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="w-full max-w-[900px] mx-auto pt-6 pb-10">
+    <div className="w-full max-w-[90%] mx-auto pt-6 pb-10">
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center text-sm space-x-2">
