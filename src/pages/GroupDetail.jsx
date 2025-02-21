@@ -3,6 +3,8 @@ import { IoRefresh } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
+
+import Alert from '@/components/modal/Alert';
 import DeleteIcon from "@/assets/icon/mypage/delete.svg";
 import userService from "@/services/user/userService";
 import defaultImage from '@/assets/icon/main/default-image.png';
@@ -52,7 +54,15 @@ export default function GroupDetail() {
     { label: "배지 많은 순", value: "mostBadge" },
     { label: "공감순", value: "mostLiked" }
   ];
-
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: "취소",
+    onConfirm: () => {},
+    onCancel: () => setAlertConfig((prev) => ({ ...prev, isOpen: false })),
+  });
   const getBadgeIcon = (badgeType) => {
     if (badgeType.startsWith("LIKE_")) return "❤️";
     if (badgeType.startsWith("MEMBER_")) return "👥"; 
@@ -317,35 +327,51 @@ const handleSelect = (selectedValue) => {
   };
 
   const handleLeaveGroup = async () => {
-    if (!window.confirm("정말 그룹을 떠나시겠습니까?")) return;
-  
-    try {
-      await groupInteractionService.leaveGroup(groupId);
-      addToast("그룹을 떠났습니다.");
-      setIsMember(false);
-  
-      const updatedGroup = await groupService.getGroupDetail(groupId);
-      navigate('/group');
-      setGroup(updatedGroup);
-    } catch (error) {
-      addToast(error.message || "그룹 떠나기 중 오류가 발생했습니다.");
-    }
+    setAlertConfig({
+      isOpen: true,
+      title: "그룹 떠나기",
+      message: "정말 그룹을 떠나시겠습니까?",
+      confirmText: "떠나기",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          await groupInteractionService.leaveGroup(groupId);
+          addToast("그룹을 떠났습니다.");
+          setIsMember(false);
+          const updatedGroup = await groupService.getGroupDetail(groupId);
+          navigate("/group");
+          setGroup(updatedGroup);
+        } catch (error) {
+          addToast(error.message || "그룹 떠나기 중 오류가 발생했습니다.");
+        } finally {
+          setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   const handleDeleteGroupImage = async () => {
     if (!group?.groupId) return;
-  
-    if (!window.confirm("정말 그룹 이미지를 삭제하시겠습니까?")) return;
-  
-    try {
-      await groupService.deleteGroupImage(group.groupId);
-      addToast("그룹 이미지가 삭제되었습니다.");
-      
-      const updatedGroup = await groupService.getGroupDetail(group.groupId);
-      setGroup(updatedGroup);
-    } catch {
-      addToast("그룹 이미지 삭제에 실패했습니다.");
-    }
+
+    setAlertConfig({
+      isOpen: true,
+      title: "그룹 이미지 삭제",
+      message: "정말 그룹 이미지를 삭제하시겠습니까?",
+      confirmText: "삭제",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          await groupService.deleteGroupImage(group.groupId);
+          addToast("그룹 이미지가 삭제되었습니다.");
+          const updatedGroup = await groupService.getGroupDetail(group.groupId);
+          setGroup(updatedGroup);
+        } catch {
+          addToast("그룹 이미지 삭제에 실패했습니다.");
+        } finally {
+          setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
   
   const decodeImageUrl = (url) => {
@@ -517,6 +543,7 @@ const handleSelect = (selectedValue) => {
           />
         </div>
       </div>
+      <Alert {...alertConfig} />
     </div>
   );
 }

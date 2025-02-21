@@ -16,7 +16,6 @@ export const connectSSE = (onMessage) => {
     eventSource.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            console.log("📢 SSE 데이터 수신:", data);
 
             if (data.type === "COMMENT_CREATED") {
                 onMessage(data);
@@ -26,8 +25,7 @@ export const connectSSE = (onMessage) => {
         }
     };
 
-    eventSource.onerror = (error) => {
-        console.error("SSE 연결 오류:", error);
+    eventSource.onerror = () => {
         eventSource.close();
     };
 
