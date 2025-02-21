@@ -161,8 +161,8 @@ export default function CreateMemory({ onClose, groupId: propGroupId, parentComp
   
       addToast("게시글이 성공적으로 등록되었습니다.");
       onClose();
-    } catch {
-      addToast("게시글 작성 중 오류가 발생했습니다.");
+    } catch(error) {
+      addToast(error.message || "게시글 작성중 오류가 발생했습니다.");
     }
   };
   
