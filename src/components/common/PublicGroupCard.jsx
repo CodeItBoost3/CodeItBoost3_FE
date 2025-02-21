@@ -1,4 +1,6 @@
+import {useState} from "react";
 import { useNavigate } from "react-router-dom";
+import useValidateLogin from "@/hooks/useValidateLogin.js";
 
 import defaultImage from '@/assets/icon/main/default-image.png';
 import lock from "@/assets/icon/main/lock-open.svg";
@@ -6,14 +8,31 @@ import picture from "@/assets/icon/main/picture.svg";
 import badge from "@/assets/icon/main/badge.svg";
 import logo from "@/assets/image/logo-image.svg";
 
+import NeedLoginToGuest from "@/components/modal/NeedLoginToGuest.jsx";
+
 export default function PublicGroupCard({ id, image, days, title, description, picturecount, emotioncount, badgecount }) {
   const navigate = useNavigate();
 
+  const {isLogin} = useValidateLogin();
+  const [isShowLogin, setIsShowLogin] = useState(false);
+
   const handleClick = () => {
-    navigate(`/group/${id}`);
+    isLogin ? navigate(`/group/${id}`) : isShowLogin ? setIsShowLogin(false) : setIsShowLogin(true);
   };
 
-    return (
+  const handleLoginModal = (type) => {
+    switch (type) {
+      case "register":
+        navigate("/login");
+        break;
+      case "guest":
+        setIsShowLogin(false);
+        break;
+    }
+  }
+
+
+  return (
       <div onClick={handleClick} className="cursor-default min-w-[210px] hover:shadow-card w-[20vw] min-h-[45vh] h-auto bg-white rounded-[7px] border border-lightViolet flex flex-col overflow-hidden">
         <div className="relative w-full p-5 h-[30vh]">
           <img
@@ -68,7 +87,9 @@ export default function PublicGroupCard({ id, image, days, title, description, p
             </div>
           </div>
         </div>
+        {isShowLogin && (<NeedLoginToGuest onClick={handleLoginModal}/>)}
       </div>
+
     );
   }
   
