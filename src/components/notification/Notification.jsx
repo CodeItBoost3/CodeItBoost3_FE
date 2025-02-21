@@ -19,7 +19,9 @@ export default function Notification({ onClose }) {
     confirmText: "확인",
     cancelText: "취소",
     onConfirm: () => {},
+    onCancel: () => setAlertConfig((prev) => ({ ...prev, isOpen: false })),
   });
+  
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -50,6 +52,7 @@ export default function Notification({ onClose }) {
           addToast(error.message);
         }
       },
+      onCancel: () => setAlertConfig((prev) => ({ ...prev, isOpen: false })),
     });
   };
 
@@ -70,6 +73,7 @@ export default function Notification({ onClose }) {
           addToast(error.message);
         }
       },
+      onCancel: () => setAlertConfig((prev) => ({ ...prev, isOpen: false })),
     });
   };
 
@@ -160,7 +164,6 @@ export default function Notification({ onClose }) {
         </div>
       </div>
 
-      {/* ✅ AlertModal 추가 */}
       <AlertModal {...alertConfig} />
     </>
   );
