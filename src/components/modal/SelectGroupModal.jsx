@@ -3,6 +3,7 @@ import GroupList from "@/components/mypage/GroupList.jsx";
 import userService from "@/services/user/userService";
 import DummyImg from "@/assets/image/profile-basic2.svg";
 import CreateMemory from "@/components/modal/CreateMemory";
+import {decodeImageUrl} from "../../utils/decodeImageUrl.js";
 
 export default function SelectGroupModal({ onClose }) {
   const [groups, setGroups] = useState([]);
@@ -16,7 +17,7 @@ export default function SelectGroupModal({ onClose }) {
         const groupList = response.data.groups.map((item) => ({
           id: item.group.groupId,
           name: item.group.groupName,
-          image: item.group.imageUrl || DummyImg,
+          image: item.group.imageUrl ? `${decodeImageUrl(item.group.imageUrl)}` : DummyImg,
         }));
 
         setGroups(groupList);
