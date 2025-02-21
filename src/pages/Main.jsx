@@ -137,7 +137,7 @@ export default function Main() {
                           image={group.image}
                           picturecount={group.postCount}
                           emotioncount={group.likeCount}
-                          badgecount={group.badgecount}
+                          badgecount={group.badgeCount}
                           days={group.dday}
                       />
                   ))}
