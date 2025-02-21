@@ -53,6 +53,13 @@ export default function GroupDetail() {
     { label: "공감순", value: "mostLiked" }
   ];
 
+  const getBadgeIcon = (badgeType) => {
+    if (badgeType.startsWith("LIKE_")) return "❤️";
+    if (badgeType.startsWith("MEMBER_")) return "👥"; 
+    if (badgeType.startsWith("MEMORY_")) return "📸"; 
+    return "🏆";
+  };
+  
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -378,12 +385,18 @@ const handleLikeGroup = async () => {
             </div>
 
             <div className="space-y-2">
-              <h1 className="mt-5 font-semibold text-base text-darkerGray ml-1">획득배지</h1>
+              <h1 className="mt-5 font-semibold text-base text-darkerGray ml-1">획득 배지</h1>
               <div className="mt-1 flex flex-col md:flex-row justify-between items-center">
                 <div className="flex flex-wrap gap-2">
-                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">👾 7일 연속 추억 등록</span>
-                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">🌼 그룹 공감 1만 개 이상 받기</span>
-                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">💖 추억 공감 1만 개 이상 받기</span>
+                {group?.badges?.length > 0 ? (
+                  group.badges.map((badge) => (
+                    <span key={badge.badgeType} className="bg-darkWhite text-sm px-3 py-1 rounded-full flex items-center">
+                      {getBadgeIcon(badge.badgeType)} {badge.badgeName}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-500 text-sm">획득한 배지가 없습니다.</span>
+                )}
                 </div>
                 
               <div className="flex space-x-4 mt-3 md:mt-0">

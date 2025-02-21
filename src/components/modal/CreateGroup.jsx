@@ -4,7 +4,6 @@ import { FaTrash } from "react-icons/fa";
 import { useToast } from "@/hooks/useToast";
 
 import groupService from "@/services/group/groupService";
-import userService from "@/services/user/userService";
 
 export default function CreateGroup({ onClose }) {
   const [groupName, setGroupName] = useState("");
@@ -17,8 +16,12 @@ export default function CreateGroup({ onClose }) {
 
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
+  
     if (file) {
+      console.log("🖼️ 선택된 이미지 파일:", file); 
+  
       setImageFile(file);
+  
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -26,6 +29,7 @@ export default function CreateGroup({ onClose }) {
       reader.readAsDataURL(file);
     }
   };
+  
 
   const handleRemoveImage = () => {
     setImageFile(null);
@@ -33,8 +37,8 @@ export default function CreateGroup({ onClose }) {
   };
 
   const handleCreateGroup = async () => {
-    if (!groupName.trim() || groupName.length < 2 || groupName.length > 36) {
-      addToast("그룹명은 2~36자로 입력해야 합니다.");
+    if (!groupName.trim() || groupName.length < 2 || groupName.length > 50) {
+      addToast("그룹명은 2~50자로 입력해야 합니다.");
       return;
     }
     if (!isPublic && (!password || password.length < 6 || password.length > 16)) {
@@ -43,31 +47,15 @@ export default function CreateGroup({ onClose }) {
     }
   
     try {
-      const userInfo = await userService.getUserInfo();
-      const userId = userInfo.data?.id;
+      const groupData = {
+        name: groupName,
+        introduction: introduction,
+        isPublic: isPublic,
+        password: isPublic ? null : password,
+        groupImage: imageFile instanceof File ? imageFile : null, // ✅ 파일 포함 여부 체크
+      };
   
-      if (!userId) {
-        throw new Error("사용자 정보를 가져올 수 없습니다.");
-      }
-  
-      const formData = new FormData();
-      formData.append("name", groupName);
-      formData.append("introduction", introduction);
-      formData.append("isPublic", isPublic.toString());
-  
-      if (!isPublic) {
-        formData.append("password", password);
-      }
-  
-      if (imageFile) {
-        formData.append("groupImage", imageFile);
-      }
-  
-      await groupService.createGroup(formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", 
-        },
-      });
+      await groupService.createGroup(groupData);
   
       addToast("그룹이 성공적으로 생성되었습니다!");
       onClose();

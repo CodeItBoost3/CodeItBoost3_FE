@@ -1,40 +1,59 @@
 import axiosInstance from "@/services/axiosInstance";
 
 /** 그룹 생성 */
-export const createGroup = async (formData) => {
+export const createGroup = async (groupData) => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
     throw new Error("인증 토큰이 없습니다. 다시 로그인해 주세요.");
   }
 
-  const payload = {
-    name: formData.get("name"),
-    introduction: formData.get("introduction"),
-    isPublic: formData.get("isPublic") === "true",
-  };
+  try {
+    // ✅ FormData 생성
+    const finalFormData = new FormData();
 
-  if (formData.get("password")) {
-    payload.password = formData.get("password");
-  }
+    // ✅ JSON 문자열을 그대로 추가 (data 키 안에 포함, Binary X)
+    const payload = {
+      name: groupData.name,
+      introduction: groupData.introduction,
+      isPublic: groupData.isPublic.toString(),
+    };
 
-  const finalFormData = new FormData();
-  finalFormData.append("data", JSON.stringify(payload));
+    if (groupData.password) {
+      payload.password = groupData.password;
+    }
 
-  if (formData.get("groupImage")) {
-    finalFormData.append("groupImage", formData.get("groupImage"));
-  }
+    finalFormData.append("data", JSON.stringify(payload)); // ✅ JSON을 문자열 그대로 추가 (바이너리 X)
 
-  return axiosInstance
-    .post(`/api/groups`, finalFormData, {
+    // ✅ 이미지 파일을 별도 필드로 추가 (있을 경우에만)
+    if (groupData.groupImage && groupData.groupImage instanceof File) {
+      finalFormData.append("groupImage", groupData.groupImage, groupData.groupImage.name);
+    } else {
+      console.warn("⚠️ groupImage가 올바른 File 객체가 아닙니다.", groupData.groupImage);
+    }
+
+    // ✅ FormData 확인용 콘솔 로그
+    console.log("📌 최종 FormData 내용:");
+    for (let [key, value] of finalFormData.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}:`, `파일 (${value.type}, 크기: ${value.size} bytes)`);
+      } else {
+        console.log(`${key}:`, value);
+      }
+    }
+
+    // ✅ 그룹 생성 요청 (JSON + multipart/form-data)
+    const response = await axiosInstance.post(`/api/groups`, finalFormData, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data", // ✅ multipart/form-data 명시
       },
-    })
-    .then((response) => response.data)
-    .catch((error) => {
-      console.error("그룹 생성 실패:", error);
-      throw error;
     });
+
+    return response.data;
+  } catch (error) {
+    console.error("❌ 그룹 생성 실패:", error);
+    throw new Error(error.response?.data?.message || "그룹 생성 중 오류가 발생했습니다.");
+  }
 };
 
 
