@@ -89,7 +89,7 @@ export default function Group() {
     };
 
     fetchGroupList();
-  }, [isPublic, sortBy, currentPage, isSearching]);
+  }, [isPublic, sortBy, currentPage, isSearching, groupData]);
 
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");

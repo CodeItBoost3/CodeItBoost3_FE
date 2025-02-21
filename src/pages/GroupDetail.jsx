@@ -93,7 +93,7 @@ export default function GroupDetail() {
     };
     fetchGroupDetail();
     fetchPosts();
-  }, [groupId]); 
+  }, [groupId, publicMemories]);
   
   const fetchPosts = async () => {
     try {

@@ -54,7 +54,7 @@ export default function MyPostList() {
       <h2 className="text-2xl font-semibold mb-4">내가 작성한 글</h2>
       
       {publicMemories.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {publicMemories.map((memory, index) => (
             <PublicPostCard key={index} {...memory} onClick={() => navigate('/')} />
           ))}
