@@ -18,26 +18,19 @@ export default function MyPostList() {
     const fetchMyPosts = async () => {
       try {
         const response = await userService.getMyPosts(currentPage, 10);
-        
         if (response?.status === "success") {
           setPublicMemories(
             response.data?.posts.map((post) => ({
-              postId: post.postId || null,
-              groupId: post.group?.groupId || null,
+              id: post.postId || null,
               title: post.title || "제목 없음",
-              content: post.content || "내용 없음",
+              author: post.author?.nickname || "알 수 없음",
+              groupId: post.group?.groupId || null,
+              location: post.group?.groupName || "그룹 없음",
+              moment: post.moment ? new Date(post.moment).toLocaleDateString("ko-KR") : "날짜 없음",
               tag: Array.isArray(post.tag) ? post.tag : [],
-              moment: post.moment
-                  ? new Date(post.moment).toLocaleDateString("ko-KR")
-                  : "날짜 없음",
-              createdAt: post.createdAt
-                  ? new Date(post.createdAt).toLocaleDateString("ko-KR")
-                  : "날짜 없음",
               imageUrl: post?.imageUrl ? `https://${post.imageUrl}` : null,
               likeCount: post.likeCount || 0,
               commentCount: post.commentCount || 0,
-              author: post.author?.nickname || "알 수 없음",
-              location: post.group?.groupName || "그룹 없음",
             }))
           );
           setTotalPages(response.data.totalPages || 1);
