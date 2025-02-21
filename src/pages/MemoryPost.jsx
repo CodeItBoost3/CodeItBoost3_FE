@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/useToast";
 import { motion, AnimatePresence } from "framer-motion";
 
+import userService from "@/services/user/userService";
 import postService from "@/services/post/postService";
 import scrapService from "@/services/scrap/scrapService";
 import defaultImage from '@/assets/icon/main/default-image.png';
@@ -20,6 +21,7 @@ import postInteractionService from "@/services/post/postInteractionService";
 
 export default function MemoryPost() {
   const { groupId, postId } = useParams();
+  const [currentUser, setCurrentUser] = useState(null);
   const addToast = useToast();
   const navigate = useNavigate();
   const [floatingIcons, setFloatingIcons] = useState([]);
@@ -29,6 +31,20 @@ export default function MemoryPost() {
   const [showEditMemory, setShowEditMemory] = useState(false);
   const [post, setPost] = useState(null);
   const [comments] = useState("");
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await userService.getUserInfo();
+        if (response.status === "success" && response.data) {
+          setCurrentUser(response.data);
+        }
+      } catch {
+        addToast("사용자 정보를 가져오는 데 실패했습니다.");
+      }
+    };
+  
+    fetchUserInfo();
+  }, []);
 
   useEffect(() => {
     const fetchScrapStatus = async () => {
@@ -154,9 +170,11 @@ export default function MemoryPost() {
               onClick={handleBookMark}
               className={`${iconStyle} ${isBookmark ? "fill-normalViolet stroke-normalViolet" : " stroke-darkGray-active [&>path:first-child]:fill-none"}`}
           />
+        {currentUser && post.author.nickname === currentUser.nickname && (
           <button>
             <img src={moreIcon} alt="더보기" className="w-6 h-6" onClick={handleMoreClick} />
           </button>
+        )}
         </div>
         {isMoreOpen &&
           <MoreOptionsModal 
