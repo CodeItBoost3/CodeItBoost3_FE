@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 
 import {useToast} from "@/hooks/useToast.js";
 
+
 import scrapService from "@/services/scrap/scrapService.js";
 
 import NoScrapIcon from "@/assets/icon/scrap/no-scrap.svg";
@@ -42,7 +43,6 @@ export default function Scrap () {
   /** 로그인 유무 판단 **/
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
     if (!token) {
       setIsLogin(false);
     } else {
@@ -68,7 +68,7 @@ export default function Scrap () {
         }
 
       } catch{
-        addToast("스크랩한 추억글 조회에 실패했습니다.");
+        if(isLogin) addToast("스크랩한 추억글 조회에 실패했습니다.");
       }
     }
 

@@ -18,6 +18,8 @@ import SearchBar from "@/components/common/SearchBar";
 import SearchButton from "@/components/common/SearchButton";
 import Select from "@/components/common/Select";
 
+import NeedLoginToGuest from "@/components/modal/NeedLoginToGuest.jsx";
+
 const GROUP_PARAMS = "group";
 
 const options = [
@@ -29,6 +31,7 @@ const options = [
 
 
 export default function Group() {
+  const [isLogin, setLogin] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,6 +44,7 @@ export default function Group() {
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [searchResult, setSearchResult] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isShowLogin, setIsShowLogin] = useState(false);
   const navigate = useNavigate();
   const tabName = searchParams.get(GROUP_PARAMS) || "Public";
   const isPublic = tabName === "Public";
@@ -51,8 +55,10 @@ export default function Group() {
       try {
         const userInfo = await userService.getUserInfo();
         setMyId(userInfo.data.id);
+        setLogin(true);
       } catch {
-        addToast("사용자 정보를 불러오는 중 오류가 발생했습니다.");
+        setLogin(false);
+        if(isLogin) addToast("사용자 정보를 불러오는 중 오류가 발생했습니다.");
       }
     };
   
@@ -78,7 +84,7 @@ export default function Group() {
           throw new Error("그룹 목록 조회 실패");
         }
       } catch {
-        addToast("그룹 목록 조회에 실패했습니다.");
+        if(isLogin) addToast("그룹 목록 조회에 실패했습니다.");
       }
     };
 
@@ -88,6 +94,17 @@ export default function Group() {
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
   }, [searchParams]);
+
+  const handleLoginModal = (type) => {
+    switch (type) {
+      case "register":
+        navigate("/login");
+        break;
+      case "guest":
+        setIsShowLogin(false);
+        break;
+    }
+  }
   
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
@@ -109,7 +126,7 @@ export default function Group() {
         throw new Error("검색 실패");
       }
     } catch {
-      addToast("검색 결과를 불러오는 중 오류가 발생했습니다.");
+      if(isLogin) addToast("검색 결과를 불러오는 중 오류가 발생했습니다.");
     }
   };
   
@@ -151,7 +168,7 @@ export default function Group() {
       navigate(`/group/${groupId}`);
 
     } catch {
-      addToast("그룹 정보 조회 중 오류가 발생했습니다.");
+      if(isLogin) addToast("그룹 정보 조회 중 오류가 발생했습니다.");
     }
   };
   
@@ -256,7 +273,7 @@ export default function Group() {
             </p>
             <p className="text-sm text-gray-400">가장 먼저 그룹을 만들어보세요!</p>
             {!isSearching && (
-              <button onClick={() => setIsModalOpen(true)}
+              <button onClick={() => isLogin ? setIsModalOpen(true) : setIsShowLogin(true)}
                       className="mt-4 px-5 py-2 bg-normalViolet hover:bg-normalViolet-hover active:bg-normalViolet-active text-white text-sm font-medium rounded-md">
                 그룹 만들기
               </button>
@@ -282,6 +299,7 @@ export default function Group() {
           onPageChange={setCurrentPage}
         />
       </div>
+      {isShowLogin && <NeedLoginToGuest onClick={handleLoginModal}/>}
     </div>
   );
 }

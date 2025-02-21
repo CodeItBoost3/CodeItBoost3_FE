@@ -3,10 +3,12 @@ import { X, Trash2, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import TimeIcon from "@/assets/icon/notification/time.svg";
 import notificationService from "@/services/notification/notificationService";
+import useValidateLogin from "@/hooks/useValidateLogin.js";
 
 export default function Notification({ onClose }) {
   const [notifications, setNotifications] = useState([]);
   const addToast = useToast();
+  const {isLogin} = useValidateLogin();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -14,7 +16,7 @@ export default function Notification({ onClose }) {
         const data = await notificationService.getNotification();
         setNotifications(data || []);
       } catch (error) {
-        addToast(error.message);
+        if(isLogin) addToast(error.message);
       }
     };
 
