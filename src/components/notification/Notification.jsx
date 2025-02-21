@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Trash2, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
+import { useNavigate } from "react-router-dom";
 import TimeIcon from "@/assets/icon/notification/time.svg";
 import notificationService from "@/services/notification/notificationService";
 import useValidateLogin from "@/hooks/useValidateLogin.js";
@@ -8,7 +9,8 @@ import useValidateLogin from "@/hooks/useValidateLogin.js";
 export default function Notification({ onClose }) {
   const [notifications, setNotifications] = useState([]);
   const addToast = useToast();
-  const {isLogin} = useValidateLogin();
+  const { isLogin } = useValidateLogin();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -16,7 +18,7 @@ export default function Notification({ onClose }) {
         const data = await notificationService.getNotification();
         setNotifications(data || []);
       } catch (error) {
-        if(isLogin) addToast(error.message);
+        if (isLogin) addToast(error.message);
       }
     };
 
@@ -43,6 +45,15 @@ export default function Notification({ onClose }) {
     }
   };
 
+  const handleNotificationClick = (groupId, postId) => {
+    if (groupId && postId) {
+      navigate(`/group/${groupId}/post/${postId}`);
+      onClose();
+    } else {
+      addToast("잘못된 알림 정보입니다.");
+    }
+  };
+
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleString("ko-KR", {
       year: "numeric",
@@ -64,7 +75,6 @@ export default function Notification({ onClose }) {
           <span className="text-black font-medium text-lg">알림 목록</span>
         </div>
         <div className="flex items-center gap-3">
-
           <button 
             onClick={handleClearAllNotifications} 
             className="text-gray-600 hover:text-black text-sm font-medium px-2 py-1 rounded-md hover:bg-gray-200 transition"
@@ -82,7 +92,8 @@ export default function Notification({ onClose }) {
           notifications.map((notification) => (
             <div
               key={notification.id}
-              className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm hover:bg-gray-50 transition"
+              className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm hover:bg-gray-50 transition cursor-pointer"
+              onClick={() => handleNotificationClick(notification.groupId, notification.postId)}
             >
               <div>
                 <h3 className="text-sm font-semibold text-black whitespace-nowrap">
@@ -97,9 +108,11 @@ export default function Notification({ onClose }) {
               </div>
 
               <div className="flex items-center gap-2">
-
                 <button 
-                  onClick={() => handleDeleteNotification(notification.id)}
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    handleDeleteNotification(notification.id);
+                  }}
                   className="text-gray-500 hover:text-red-400 transition"
                   title="삭제"
                 >
