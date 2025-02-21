@@ -26,7 +26,6 @@ export default function Mypage() {
   const replyScrollRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
-  const [isShowLoginModal, setIsShowLoginModal] = useState(!isLogin);
   const [nickname, setNickname] = useState("예비 사용자");
   const [isTimeoutPassed, setIsTimeoutPassed] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -50,7 +49,6 @@ export default function Mypage() {
         break;
       case "guest":
         navigate("/");
-        setIsShowLoginModal(false);
         break;
     }
   }
@@ -257,7 +255,7 @@ export default function Mypage() {
         <EditProfile id={"gildeong32"} nickname={"홍길동"} onClose={() => setModalVisible(false)} onVerfiyChange={handleVerfiyChange} />
       )}
       {isSecondeModalVisible && <PassWordChange onClose={() => setSecondeModalVisible(false)} />}
-      {isShowLoginModal && <NeedLoginToGuest onClick={handleLoginModal}/>}
+      {!isLogin && <NeedLoginToGuest onClick={handleLoginModal}/>}
     </div>
   );
 }
