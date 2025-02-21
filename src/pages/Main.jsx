@@ -106,6 +106,17 @@ export default function Main() {
     }
   }
 
+  const decodeImageUrl = (url) => {
+    if (!url) return null;
+
+    try {
+      const decodedUrl = decodeURIComponent(url);
+      return `https://d1up383l0okfvw.cloudfront.net/${decodedUrl}`;
+    } catch {
+      return `https://d1up383l0okfvw.cloudfront.net/${url}`;
+    }
+  };
+
   return (
       <div className="w-full h-full pt-3 pb-7 overflow-auto">
         <div className="flex items-center mb-1">
@@ -134,7 +145,7 @@ export default function Main() {
                           key={group.groupId}
                           title={group.groupName}
                           description={group.description}
-                          image={group.image}
+                          image={decodeImageUrl(group.imageUrl)}
                           picturecount={group.postCount}
                           emotioncount={group.likeCount}
                           badgecount={group.badgecount}

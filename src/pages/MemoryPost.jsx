@@ -59,7 +59,7 @@ export default function MemoryPost() {
     if (postId) {
       fetchScrapStatus();
     }
-  }, [postId]);
+  }, [postId, post]);
   
   useEffect(() => {
     const fetchPostDetail = async () => {
