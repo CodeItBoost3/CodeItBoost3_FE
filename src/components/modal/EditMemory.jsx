@@ -76,6 +76,8 @@ export default function EditMemory({ post, onClose, onUpdate }) {
     if (!post || !post.postId) {
       addToast("수정할 게시글 정보가 없습니다.");
       return;
+    } else{
+      addToast("게시글 수정이 완료됬습니다.");
     }
   
     const formDataToSend = new FormData();
