@@ -9,6 +9,7 @@ import GroupCard from "@/components/mypage/GroupCard.jsx";
 import Reply from "@/components/mypage/Reply.jsx";
 import EditProfile from "@/components/modal/EditProfile.jsx";
 import PassWordChange from "@/components/modal/PasswordChange.jsx";
+import NeedLoginToGuest from "@/components/modal/NeedLoginToGuest.jsx";
 
 import userService from "@/services/user/userService";
 
@@ -25,6 +26,7 @@ export default function Mypage() {
   const replyScrollRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
+  const [isShowLoginModal, setIsShowLoginModal] = useState(!isLogin);
   const [nickname, setNickname] = useState("예비 사용자");
   const [isTimeoutPassed, setIsTimeoutPassed] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -41,6 +43,17 @@ export default function Mypage() {
     navigate("/mypage/comments");
   };
 
+  const handleLoginModal = (type) => {
+    switch (type) {
+      case "register":
+        navigate("/login");
+        break;
+      case "guest":
+        navigate("/");
+        setIsShowLoginModal(false);
+        break;
+    }
+  }
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -49,7 +62,7 @@ export default function Mypage() {
         setIsLogin(true);
       } catch {
         setIsLogin(false);
-        addToast("사용자 정보를 불러올 수 없습니다.");
+        if(isLogin) addToast("사용자 정보를 불러올 수 없습니다.");
       } finally {
         setIsLoading(false);
       }
@@ -97,7 +110,7 @@ export default function Mypage() {
           );
         } catch (error) {
           console.error("내가 작성한 글 불러오기 실패:", error);
-          addToast("내가 작성한 글을 불러오는 데 실패했습니다.");
+          if(isLogin) addToast("내가 작성한 글을 불러오는 데 실패했습니다.");
         }
       };
     
@@ -120,7 +133,7 @@ export default function Mypage() {
         );
       } catch (error) {
         console.error("내가 작성한 댓글 불러오기 실패:", error);
-        if (error.response?.status !== 200) {
+        if (error.response?.status !== 200 && isLogin) {
           addToast("내가 작성한 댓글을 불러오는 데 실패했습니다.");
         }
       }
@@ -244,6 +257,7 @@ export default function Mypage() {
         <EditProfile id={"gildeong32"} nickname={"홍길동"} onClose={() => setModalVisible(false)} onVerfiyChange={handleVerfiyChange} />
       )}
       {isSecondeModalVisible && <PassWordChange onClose={() => setSecondeModalVisible(false)} />}
+      {isShowLoginModal && <NeedLoginToGuest onClick={handleLoginModal}/>}
     </div>
   );
 }

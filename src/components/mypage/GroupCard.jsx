@@ -3,10 +3,12 @@ import GroupList from "@/components/mypage/GroupList.jsx";
 import userService from "@/services/user/userService";
 import { useToast } from "@/hooks/useToast";
 import DummyImg from "@/assets/image/profile-basic2.svg";
+import useValidateLogin from "@/hooks/useValidateLogin.js";
 
 export default function GroupCard() {
   const [groups, setGroups] = useState([]);
   const addToast = useToast();
+  const {isLogin} = useValidateLogin();
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -20,7 +22,7 @@ export default function GroupCard() {
 
         setGroups(groupList);
       } catch {
-        addToast("내가 속한 그룹 목록 불러오기에 실패했습니다.");
+        if(isLogin) addToast("내가 속한 그룹 목록 불러오기에 실패했습니다.");
       }
     };
 

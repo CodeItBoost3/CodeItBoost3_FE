@@ -38,7 +38,7 @@ export default function Main() {
         setIsLogin(true);
       } catch {
         setIsLogin(false);
-        addToast("사용자 정보를 불러올 수 없습니다.");
+        if(isLogin) addToast("사용자 정보를 불러올 수 없습니다.");
       }
     };
 
@@ -60,7 +60,7 @@ export default function Main() {
           throw new Error("그룹 목록 조회 실패");
         }
       } catch {
-        addToast("그룹 목록 조회에 실패했습니다.");
+        if(isLogin) addToast("그룹 목록 조회에 실패했습니다.");
       }
     };
 
@@ -78,7 +78,7 @@ export default function Main() {
           throw new Error("내가 작성한 글 목록 조회 실패");
         }
       } catch {
-        addToast("최근에 작성한 글 조회에 실패했습니다.");
+        if(isLogin) addToast("최근에 작성한 글 조회에 실패했습니다.");
       }
     }
 
@@ -93,6 +93,17 @@ export default function Main() {
 
   const handleRecentNotice = () => {
     navigate("/notice/20")
+  }
+
+  const handleLoginModal = (type) => {
+    switch (type) {
+      case "register":
+        navigate("/login");
+        break;
+      case "guest":
+        setIsLoginModalOpen(false);
+        break;
+    }
   }
 
   return (
@@ -154,8 +165,7 @@ export default function Main() {
                 <span className="text-black text-base font-semibold">최근에 내가 작성한 </span>
                 <span className="text-darkViolet text-base font-semibold">추억 글</span>
               </div>
-              <div
-                  className="cursor-pointer text-right text-normalGray hover:text-normalGray-hover active:text-normalGray-active text-sm font-semibold">
+              <div className="cursor-pointer text-right text-normalGray hover:text-normalGray-hover active:text-normalGray-active text-sm font-semibold" onClick={() => !isLogin ? setIsLoginModalOpen(true) : navigate('mypage/posts')}>
                 전체 글 보러가기
               </div>
             </div>
@@ -186,7 +196,7 @@ export default function Main() {
           <MemoryActions widthClass="flex-1" marginTop="mt-[7vh]" onClickGroup={handleGroupRegist}/>
         </div>
         {isGroupMakeModalOpen && <CreateGroup onClose={() => setIsGroupMakeModalOpen(false)}/>}
-        {isLoginModalOpen && <NeedLoginToGuest isLogin={isLogin}/>}
+        {isLoginModalOpen && <NeedLoginToGuest onClick={handleLoginModal}/>}
       </div>
   );
 }

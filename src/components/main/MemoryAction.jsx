@@ -39,13 +39,13 @@ export default function MemoryActions({ widthClass = "flex-1", marginTop = "mt-0
       </div>
 
       <div className="flex flex-col gap-3 w-full">
-        <div className="bg-white rounded-md p-3 shadow-sm cursor-pointer" onClick={() => isLogin ? setShowLoginModal(true) : setShowCreateGroupModal(true)}>
+        <div className="bg-white rounded-md p-3 shadow-sm cursor-pointer" onClick={() => !isLogin ? setShowLoginModal(true) : setShowCreateGroupModal(true)}>
           <span className="text-black text-sm font-normal">
             새로운 <span className="text-darkViolet">조각 그룹</span> 등록하기
           </span>
         </div>
 
-        <div className="bg-white rounded-md p-3 shadow-sm cursor-pointer" onClick={() => setShowMemoryModal(true)}>
+        <div className="bg-white rounded-md p-3 shadow-sm cursor-pointer" onClick={() => !isLogin ? setShowLoginModal(true) : setShowMemoryModal(true)}>
           <span className="text-[#2a2a2a] text-sm font-normal">
             새로운 <span className="text-darkViolet">추억</span> 기록하기
           </span>
