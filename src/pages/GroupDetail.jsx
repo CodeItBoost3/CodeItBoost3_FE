@@ -3,6 +3,8 @@ import { IoRefresh } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/useToast";
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
+
+import Alert from '@/components/modal/Alert';
 import DeleteIcon from "@/assets/icon/mypage/delete.svg";
 import userService from "@/services/user/userService";
 import defaultImage from '@/assets/icon/main/default-image.png';
@@ -27,7 +29,7 @@ export default function GroupDetail() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "latest");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -52,7 +54,22 @@ export default function GroupDetail() {
     { label: "배지 많은 순", value: "mostBadge" },
     { label: "공감순", value: "mostLiked" }
   ];
-
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: "취소",
+    onConfirm: () => {},
+    onCancel: () => setAlertConfig((prev) => ({ ...prev, isOpen: false })),
+  });
+  const getBadgeIcon = (badgeType) => {
+    if (badgeType.startsWith("LIKE_")) return "❤️";
+    if (badgeType.startsWith("MEMBER_")) return "👥"; 
+    if (badgeType.startsWith("MEMORY_")) return "📸"; 
+    return "🏆";
+  };
+  
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -101,8 +118,8 @@ export default function GroupDetail() {
         groupId,
         page: currentPage,
         pageSize: 10,
-        sortBy,
-        keyword: searchTerm.trim(),
+        sortBy, // ✅ 정렬 옵션 적용
+        keyword: searchTerm.trim(), // ✅ 검색어 반영
         isPublic: tabName === "Public",
       });
   
@@ -131,7 +148,7 @@ export default function GroupDetail() {
       addToast("게시글 목록 조회에 실패했습니다.");
     }
   };
-
+  
   useEffect(() => {
     setSortBy(searchParams.get("sortBy") || "mostLiked");
   }, [searchParams]);
@@ -264,12 +281,14 @@ const handleLikeGroup = async () => {
   }
 };
   
-  const handleSelect = (selectedValue) => {
-    if (selectedValue !== sortBy) {
-      setSortBy(selectedValue);
-      setSearchParams({ sortBy: selectedValue, group: tabName }, { replace: true });
-    }
-  };
+const handleSelect = (selectedValue) => {
+  if (selectedValue !== sortBy) {
+    setSortBy(selectedValue);
+    setSearchParams({ sortBy: selectedValue, group: tabName }, { replace: true });
+
+    fetchPosts();
+  }
+};
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -308,35 +327,51 @@ const handleLikeGroup = async () => {
   };
 
   const handleLeaveGroup = async () => {
-    if (!window.confirm("정말 그룹을 떠나시겠습니까?")) return;
-  
-    try {
-      await groupInteractionService.leaveGroup(groupId);
-      addToast("그룹을 떠났습니다.");
-      setIsMember(false);
-  
-      const updatedGroup = await groupService.getGroupDetail(groupId);
-      navigate('/group');
-      setGroup(updatedGroup);
-    } catch (error) {
-      addToast(error.message || "그룹 떠나기 중 오류가 발생했습니다.");
-    }
+    setAlertConfig({
+      isOpen: true,
+      title: "그룹 떠나기",
+      message: "정말 그룹을 떠나시겠습니까?",
+      confirmText: "떠나기",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          await groupInteractionService.leaveGroup(groupId);
+          addToast("그룹을 떠났습니다.");
+          setIsMember(false);
+          const updatedGroup = await groupService.getGroupDetail(groupId);
+          navigate("/group");
+          setGroup(updatedGroup);
+        } catch (error) {
+          addToast(error.message || "그룹 떠나기 중 오류가 발생했습니다.");
+        } finally {
+          setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   const handleDeleteGroupImage = async () => {
     if (!group?.groupId) return;
-  
-    if (!window.confirm("정말 그룹 이미지를 삭제하시겠습니까?")) return;
-  
-    try {
-      await groupService.deleteGroupImage(group.groupId);
-      addToast("그룹 이미지가 삭제되었습니다.");
-      
-      const updatedGroup = await groupService.getGroupDetail(group.groupId);
-      setGroup(updatedGroup);
-    } catch {
-      addToast("그룹 이미지 삭제에 실패했습니다.");
-    }
+
+    setAlertConfig({
+      isOpen: true,
+      title: "그룹 이미지 삭제",
+      message: "정말 그룹 이미지를 삭제하시겠습니까?",
+      confirmText: "삭제",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          await groupService.deleteGroupImage(group.groupId);
+          addToast("그룹 이미지가 삭제되었습니다.");
+          const updatedGroup = await groupService.getGroupDetail(group.groupId);
+          setGroup(updatedGroup);
+        } catch {
+          addToast("그룹 이미지 삭제에 실패했습니다.");
+        } finally {
+          setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
   
   const decodeImageUrl = (url) => {
@@ -350,6 +385,10 @@ const handleLikeGroup = async () => {
   
   const decodedImageUrl = group?.imageUrl ? decodeImageUrl(group.imageUrl) : null;
 
+  useEffect(() => {
+    fetchPosts();
+  }, [groupId, sortBy, searchTerm, isSearching]);
+  
   
   return (
     <div className="w-full max-w-full mx-auto py-3">
@@ -378,12 +417,18 @@ const handleLikeGroup = async () => {
             </div>
 
             <div className="space-y-2">
-              <h1 className="mt-5 font-semibold text-base text-darkerGray ml-1">획득배지</h1>
+              <h1 className="mt-5 font-semibold text-base text-darkerGray ml-1">획득 배지</h1>
               <div className="mt-1 flex flex-col md:flex-row justify-between items-center">
                 <div className="flex flex-wrap gap-2">
-                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">👾 7일 연속 추억 등록</span>
-                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">🌼 그룹 공감 1만 개 이상 받기</span>
-                  <span className="bg-darkWhite text-sm px-3 py-1 rounded-full">💖 추억 공감 1만 개 이상 받기</span>
+                {group?.badges?.length > 0 ? (
+                  group.badges.map((badge) => (
+                    <span key={badge.badgeType} className="bg-darkWhite text-sm px-3 py-1 rounded-full flex items-center">
+                      {getBadgeIcon(badge.badgeType)} {badge.badgeName}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-500 text-sm">획득한 배지가 없습니다.</span>
+                )}
                 </div>
                 
               <div className="flex space-x-4 mt-3 md:mt-0">
@@ -498,6 +543,7 @@ const handleLikeGroup = async () => {
           />
         </div>
       </div>
+      <Alert {...alertConfig} />
     </div>
   );
 }

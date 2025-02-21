@@ -39,7 +39,7 @@ export default function Group() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const [myId, setMyId] = useState(null);
-  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "mostLiked");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "latest");
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [searchResult, setSearchResult] = useState([]);
@@ -188,12 +188,20 @@ export default function Group() {
       addToast("비밀번호 검증 중 오류가 발생했습니다.");
     }
   };
+
+  
   const decodeImageUrl = (url) => {
     if (!url) return null;
-    
+  
     try {
+      // UTF-8 디코딩 적용
       const decodedUrl = decodeURIComponent(url);
-      return `https://d1up383l0okfvw.cloudfront.net/${decodedUrl}`;
+  
+      // CDN이 포함되지 않은 경우 자동 추가
+      if (!decodedUrl.startsWith("https")) {
+        return `https://d1up383l0okfvw.cloudfront.net/${decodedUrl}`;
+      }
+      return decodedUrl;
     } catch {
       return `https://d1up383l0okfvw.cloudfront.net/${url}`;
     }

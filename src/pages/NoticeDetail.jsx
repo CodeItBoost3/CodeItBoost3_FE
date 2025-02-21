@@ -1,9 +1,7 @@
-import {useState} from "react";
 import {useParams, useNavigate} from "react-router-dom";
 import dayjs from "dayjs";
 
 import Title from "@/components/notice/Title.jsx";
-import SearchBars from "@/components/notice/SearchBars.jsx";
 import SquareButton from "@/components/common/SearchButton.jsx";
 
 import EyesIcon from '@/assets/icon/notice/eyes.svg';
@@ -75,7 +73,7 @@ const noticeDetailData = [
   },
   {
     id: 20,
-    title: "조각집 사용법 보러가기",
+    title: "조각집 사용법",
     createdAt: "2025-01-21",
     view: 45,
     content: "안녕하세요! 조각집에 처음 가입하신 여러분을 환영합니다. 아래 가이드를 참고하여 사용법을 익혀보세요.\n" +
@@ -106,10 +104,6 @@ export default function NoticeDetail() {
   const id = Number(useParams().noticeId);
   const data = noticeDetailData.find(item => item.id === id);
 
-  const [search, setSearch] = useState("");
-
-  const handleSearch = () => {
-  }
 
   const handleGotoList = () => {
     navigate('/notice');
@@ -125,13 +119,9 @@ export default function NoticeDetail() {
             title={"조각집"}
             subtitle={"공지사항"}
         />
-        <SearchBars
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            handleSearch={handleSearch}
-        />
-        <div className="text-black text-xl font-bold mb-6">{data.title}</div>
-        <div className="flex items-center gap-5 mb-4">
+        <hr />
+        <div className="text-black mt-6 text-xl font-bold mb-6">{data.title}</div>
+        <div className="flex items-center gap-5 mb-9">
           <div className="flex items-center gap-1">
             <img src={EyesIcon}/>
             <p className="text-black text-xs font-bold ">{data.view}</p>
@@ -140,14 +130,19 @@ export default function NoticeDetail() {
             <img src={CalendarIcon}/>
             <p className="text-black text-xs font-bold ">{convertDateData(data.createdAt)}</p>
           </div>
+          
         </div>
-        <div className="mb-8 pt-16 pb-16">
+        <hr />
+        <div className="mb-8 py-10">
           <p className="text-black text-base font-normal whitespace-pre-line">{data.content}</p>
         </div>
+        <hr />
+        <div className="mt-10 mb-5">
         <SquareButton
             name="목록으로"
             onClick={handleGotoList}
         />
+        </div>
       </div>
   )
 }
