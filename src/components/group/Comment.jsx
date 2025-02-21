@@ -3,6 +3,7 @@ import commentService from "@/services/comment/commentService";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useToast } from "@/hooks/useToast";
 
+import Alert from "@/components/modal/Alert";
 import userService from "@/services/user/userService";
 import userProfile from "@/assets/icon/group/default-profile.svg";
 import EditIcon from "@/assets/icon/group/comment-edit.svg";
@@ -105,6 +106,8 @@ export default function CommentSection({ postId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [myId, setMyId] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedCommentId, setSelectedCommentId] = useState(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -122,9 +125,22 @@ export default function CommentSection({ postId }) {
     const fetchComments = async () => {
       try {
         const response = await commentService.getCommentsByPost(postId);
-
+  
         if (response.status === "success" && response.data?.comments) {
-          setComments(response.data.comments);
+          const myUserId = myId; 
+  
+          const updatedComments = response.data.comments.map((comment) => ({
+            ...comment,
+            likeCount: comment.likes.length, 
+            isLiked: comment.likes.some((like) => like.userId === myUserId), 
+            replies: comment.replies.map((reply) => ({
+              ...reply,
+              likeCount: reply.likes.length,
+              isLiked: reply.likes.some((like) => like.userId === myUserId),
+            })),
+          }));
+  
+          setComments(updatedComments);
         } else {
           setComments([]);
         }
@@ -132,21 +148,36 @@ export default function CommentSection({ postId }) {
         addToast("댓글을 불러오는 중 오류가 발생했습니다.");
       }
     };
-
+  
     fetchComments();
-  }, [postId]);
+  }, [postId, myId]); 
+  
 
   const handleCommentEdit = async (commentId, updatedContent) => {
     try {
       await commentService.updateComment(commentId, updatedContent);
+  
       setComments((prevComments) =>
-        prevComments.map((c) => (c.commentId === commentId ? { ...c, content: updatedContent } : c))
+        prevComments.map((c) =>
+          c.commentId === commentId
+            ? { ...c, content: updatedContent, updatedAt: new Date().toISOString() }
+            : {
+                ...c,
+                replies: c.replies.map((reply) =>
+                  reply.commentId === commentId
+                    ? { ...reply, content: updatedContent, updatedAt: new Date().toISOString() }
+                    : reply
+                ),
+              }
+        )
       );
+  
       addToast("댓글이 수정되었습니다.");
     } catch {
       addToast("댓글 수정 중 오류가 발생했습니다.");
     }
   };
+  
 
   const handleCommentSubmit = async () => {
     if (newComment.trim() === "") return;
@@ -189,15 +220,34 @@ export default function CommentSection({ postId }) {
   
 
   const handleCommentDelete = async (commentId) => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
-
+    setSelectedCommentId(commentId);
+    setIsDeleteModalOpen(true);
+  };
+  
+  const confirmDeleteComment = async () => {
+    if (!selectedCommentId) return;
+  
     try {
-      await commentService.deleteComment(commentId);
-      setComments((prevComments) => prevComments.filter((c) => c.commentId !== commentId));
+      await commentService.deleteComment(selectedCommentId);
+  
+      setComments((prevComments) =>
+        prevComments
+          .filter((c) => c.commentId !== selectedCommentId) 
+          .map((c) => ({
+            ...c,
+            replies: c.replies.filter((reply) => reply.commentId !== selectedCommentId),
+          }))
+      );
+  
+      addToast("댓글이 삭제되었습니다.");
     } catch {
       addToast("댓글 삭제 중 오류가 발생했습니다.");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedCommentId(null);
     }
   };
+  
 
   const handleCommentLike = async (commentId) => {
     try {
@@ -276,7 +326,15 @@ export default function CommentSection({ postId }) {
         ))
       )}
     </div>
-
+    <Alert
+      isOpen={isDeleteModalOpen}
+      title="댓글 삭제"
+      message="정말로 삭제하시겠습니까?"
+      confirmText="삭제"
+      cancelText="취소"
+      onConfirm={confirmDeleteComment}
+      onCancel={() => setIsDeleteModalOpen(false)}
+    />
     </div>
   );
 }
