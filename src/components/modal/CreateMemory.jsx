@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 import PropTypes from "prop-types";
 
-import { FaTrash, FaTimes } from "react-icons/fa";
+import { FaTrash, FaTimes, FaLightbulb } from "react-icons/fa";
 import postService from "@/services/post/postService";
 import { useToast } from "@/hooks/useToast";
+import axiosInstance from "@/services/axiosInstance";
 
 export default function CreateMemory({ onClose, groupId: propGroupId, parentComponent }) {
   const { groupId: paramGroupId } = useParams();
@@ -22,7 +23,69 @@ export default function CreateMemory({ onClose, groupId: propGroupId, parentComp
     memoryDate: "",
   });
 
-  /** 대표 이미지 업로드 */
+  // 🔹 글감 추천 관련 상태
+  const [isLoadingPrompt, setIsLoadingPrompt] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [displayedText, setDisplayedText] = useState("");
+  const intervalRef = useRef(null);
+
+  /** 🔹 글감 추천 가져오기 */
+  const fetchPrompt = async () => {
+    setIsLoadingPrompt(true);
+    setDisplayedText("");
+
+    try {
+      const response = await axiosInstance.get("/prompt");
+      const newPrompt = response.data?.data?.prompt || "글감을 가져올 수 없습니다. 다시 시도해주세요.";
+
+      setPrompt(newPrompt);
+      setDisplayedText("");
+      setIsLoadingPrompt(false);
+    } catch {
+      addToast("글감을 가져오는 중 오류가 발생했습니다.");
+      setIsLoadingPrompt(false);
+    }
+  };
+
+  /** 🔹 타이핑 애니메이션 */
+  useEffect(() => {
+    if (!prompt || prompt.length === 0) return;
+
+    let i = 0;
+    setDisplayedText("");
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      if (i >= prompt.length) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        return;
+      }
+
+      setDisplayedText(prompt.slice(0, i + 1));
+      i++;
+    }, 50);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [prompt]);
+
+  /** 🔹 추천 글감 적용 */
+  const applyPromptToTitle = () => {
+    setFormData((prev) => ({
+      ...prev,
+      title: displayedText,
+    }));
+  };
+
+  /** 🔹 기존 함수 (대표 이미지 업로드, 삭제, 태그 추가 등 그대로 유지) */
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -35,19 +98,16 @@ export default function CreateMemory({ onClose, groupId: propGroupId, parentComp
     }
   };
 
-  /** 이미지 삭제 */
   const handleRemoveImage = () => {
     setImageFile(null);
     setPreviewImage(null);
   };
 
-  /** 입력 필드 변경 */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /** 태그 추가 */
   const handleTagKeyDown = (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -62,52 +122,51 @@ export default function CreateMemory({ onClose, groupId: propGroupId, parentComp
     }
   };
 
-  /** 태그 삭제 */
   const handleTagClick = (tagToRemove) => {
     setFormData((prev) => ({
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
-  
+
   /** 게시글 작성 요청 */
-const handleCreatePost = async () => {
-  if (!groupId) {
-    addToast("올바른 그룹을 선택해주세요.");
-    return;
-  }
-  if (!formData.title.trim()) {
-    addToast("제목을 입력해주세요.");
-    return;
-  }
-  if (!formData.content.trim()) {
-    addToast("본문 내용을 입력해주세요.");
-    return;
-  }
-  if (!formData.memoryDate) {
-    addToast("추억의 순간 날짜를 선택해주세요.");
-    return;
-  }
-
-  try {
-    const postData = {
-      title: formData.title,
-      content: formData.content,
-      location: formData.location,
-      moment: formData.memoryDate,
-      tag: formData.tags,
-      imageFile: imageFile,
-    };
-    await postService.createPost(groupId, postData);
-
-    addToast("게시글이 성공적으로 등록되었습니다.");
-    onClose();
-  } catch {
-    addToast("게시글 작성 중 오류가 발생했습니다.");
-  }
-};
-
-
+  const handleCreatePost = async () => {
+    if (!groupId) {
+      addToast("올바른 그룹을 선택해주세요.");
+      return;
+    }
+    if (!formData.title.trim()) {
+      addToast("제목을 입력해주세요.");
+      return;
+    }
+    if (!formData.content.trim()) {
+      addToast("본문 내용을 입력해주세요.");
+      return;
+    }
+    if (!formData.memoryDate) {
+      addToast("추억의 순간 날짜를 선택해주세요.");
+      return;
+    }
+  
+    try {
+      const postData = {
+        title: formData.title,
+        content: formData.content,
+        location: formData.location,
+        moment: formData.memoryDate,
+        tag: formData.tags,
+        imageFile: imageFile,
+      };
+      await postService.createPost(groupId, postData);
+  
+      addToast("게시글이 성공적으로 등록되었습니다.");
+      onClose();
+    } catch {
+      addToast("게시글 작성 중 오류가 발생했습니다.");
+    }
+  };
+  
+  
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-10 z-20">
       <div className="relative w-[90%] md:w-[65%] min-h-[50%] h-auto px-6 md:px-[65px] pt-[40px] pb-[70px] bg-white rounded-[20px] shadow-md border border-darkWhite flex flex-col justify-start items-center overflow-hidden">
@@ -120,7 +179,50 @@ const handleCreatePost = async () => {
           새로운 추억 기록하기
         </h2>
 
-        <div className="flex flex-col md:flex-row gap-6 w-full">
+        <button
+          onClick={fetchPrompt}
+          className="absolute top-4 left-4 flex items-center p-2 rounded-[5px] bg-lightGray hover:bg-lightGray-hover gap-2 text-gray-700 hover:text-gray-900 transition group"
+        >
+          <FaLightbulb size={18} />
+          <span className="text-sm">글감 추천</span>
+
+          <div className="absolute right-[-200%] top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            글감 추천 버튼을 이용해 보세요!
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-2 border-8 border-transparent border-r-gray-800"></div>
+          </div>
+        </button>
+
+
+        {isLoadingPrompt ? (
+          <p className="text-sm text-gray-600 mb-2">⏳ 글감 추천 중...</p>
+        ) : (
+          <>
+          {displayedText && (
+            <div className="bg-lightGray py-3 pl-4 pr-5 rounded-md text-black text-sm my-2 relative">
+              <p>{displayedText}</p>
+          
+              <button
+                onClick={() => {
+                  setPrompt("");
+                  setDisplayedText("");
+                }}
+                className="absolute top-1 right-1 text-gray-600 hover:text-gray-800"
+              >
+                <FaTimes size={14} />
+              </button>
+          
+              <button
+                onClick={applyPromptToTitle}
+                className="mt-1 text-xs text-blue-600 underline"
+              >
+                제목에 적용하기
+              </button>
+            </div>
+          )}
+          </>
+        )}
+
+      <div className="flex flex-col md:flex-row gap-6 w-full">
           
           <div className="w-full md:w-[50%] flex flex-col">
             <div className="flex flex-col gap-6">
@@ -250,7 +352,7 @@ const handleCreatePost = async () => {
 }
 
 CreateMemory.propTypes = {
-  groupId: PropTypes.number, 
+  groupId: PropTypes.number,
   onClose: PropTypes.func.isRequired,
   parentComponent: PropTypes.string,
 };
