@@ -192,7 +192,7 @@ export default function Mypage() {
 
         <div className="flex gap-10 max-w-[93%]">
           <ProfileEditCard onClickEdit={handleEdit}/>
-          <MemoryAction isLogin={!isLogin}/>
+          <MemoryAction isLogin={isLogin}/>
           <GroupCard/>
         </div>
 
@@ -214,7 +214,7 @@ export default function Mypage() {
                     </div>
                 )}
                 <Swiper
-                    className="custom-swiper h-full max-w-[87vw] w-full overflow-x-auto"
+                    className="custom-swiper max-w-[87vw] w-full overflow-x-auto"
                     modules={[Navigation]}
                     navigation={{
                       // pervEl/nextEl의 경우

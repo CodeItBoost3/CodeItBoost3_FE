@@ -44,7 +44,7 @@ export default function GroupDetail() {
   const [isMember, setIsMember] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searching, setSearching] = useState(false);
-  const [isSearching, setIsSearching] = useState(false); 
+  const [isSearching, setIsSearching] = useState(false);
   const GROUP_PARAMS = 'group';
   const tabName = searchParams.get(GROUP_PARAMS) || 'Public';
   const [floatingIcons, setFloatingIcons] = useState([]);
@@ -66,18 +66,18 @@ export default function GroupDetail() {
   });
   const getBadgeIcon = (badgeType) => {
     if (badgeType.startsWith("LIKE_")) return "❤️";
-    if (badgeType.startsWith("MEMBER_")) return "👥"; 
-    if (badgeType.startsWith("MEMORY_")) return "📸"; 
+    if (badgeType.startsWith("MEMBER_")) return "👥";
+    if (badgeType.startsWith("MEMORY_")) return "📸";
     return "🏆";
   };
-  
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const data = await userService.getUserInfo();
         const userId = data.data.id;
         setMyId(userId);
-  
+
         if (group?.members) {
           const member = group.members.find((member) => member.userId === userId);
           setIsMember(!!member);
@@ -87,12 +87,12 @@ export default function GroupDetail() {
         addToast("사용자 정보를 불러오는 중 오류가 발생했습니다.");
       }
     };
-  
+
     if (group) {
       fetchUserInfo();
     }
   }, [group]); // ✅ `group`이 변경될 때마다 실행
-  
+
   const fetchGroupDetail = useCallback(async () => {
     try {
       const data = await groupService.getGroupDetail(groupId);
@@ -105,22 +105,22 @@ export default function GroupDetail() {
       addToast("그룹 상세 조회에 실패했습니다.");
     }
   }, [groupId, addToast]);
-  
+
   const fetchPosts = useCallback(async () => {
     if (!groupId) return;
-    
+
     setSearching(true);
-    
+
     try {
       const postList = await postService.getPostList({
         groupId,
         page: currentPage,
         pageSize: 10,
         sortBy,
-        keyword: searchTerm.trim(), 
+        keyword: searchTerm.trim(),
         isPublic: tabName === "Public",
       });
-  
+
       if (postList.status === "success" && postList.data) {
         setTotalPages(postList.data.totalPages);
         setPublicMemories(
@@ -148,12 +148,12 @@ export default function GroupDetail() {
       setSearching(false);
     }
   }, [groupId, currentPage, sortBy, searchTerm, tabName, addToast]);
-  
+
   useEffect(() => {
     fetchGroupDetail();
     fetchPosts();
   }, [fetchGroupDetail, fetchPosts]);
-  
+
   const handleSearch = useCallback(() => {
     if (!searchTerm.trim()) {
       setIsSearching(false);
@@ -163,23 +163,23 @@ export default function GroupDetail() {
       fetchPosts();
       return;
     }
-  
+
     setIsSearching(true);
   }, [searchTerm, fetchPosts]);
-  
+
   const handleRefresh = useCallback(async () => {
-    setSearchTerm(""); 
+    setSearchTerm("");
     setCurrentPage(1);
     setSortBy("mostLiked");
     setSearchParams({ sortBy: "mostLiked", group: tabName }, { replace: true });
-  
+
     setIsSearching(false);
     setSearching(false);
     setPublicMemories([]);
-    
+
     await fetchPosts();
   }, [fetchPosts, setSearchParams, tabName]);
-  
+
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
   }, []);
@@ -197,7 +197,7 @@ useEffect(() => {
         page: currentPage,
         pageSize: 10,
         sortBy,
-        keyword: searchTerm.trim(), 
+        keyword: searchTerm.trim(),
         isPublic: tabName === "Public",
       });
 
@@ -225,12 +225,12 @@ useEffect(() => {
       addToast("게시글 검색에 실패했습니다.");
     } finally {
       setSearching(false);
-      setIsSearching(false); 
+      setIsSearching(false);
     }
   };
 
   fetchSearchResults();
-}, [isSearching]); 
+}, [isSearching]);
 
 const handleLikeGroup = async () => {
   try {
@@ -252,7 +252,7 @@ const handleLikeGroup = async () => {
     addToast("공감 추가 중 오류가 발생했습니다.");
   }
 };
-  
+
 const handleSelect = (selectedValue) => {
   if (selectedValue !== sortBy) {
     setSortBy(selectedValue);
@@ -278,18 +278,18 @@ const handleSelect = (selectedValue) => {
       await groupService.deleteGroup(groupId);
       addToast("그룹이 삭제되었습니다.");
       navigate(`/group`);
-      fetchPosts(); 
+      fetchPosts();
     } catch {
       console.log("게시글 삭제에 실패했습니다.");
     }
   };
-  
+
 
   const handleJoinGroup = async () => {
     try {
       await groupInteractionService.joinGroup(groupId);
       addToast("그룹에 성공적으로 참여했습니다.");
-      
+
       const updatedGroup = await groupService.getGroupDetail(groupId);
       setGroup(updatedGroup);
     } catch (error) {
@@ -318,6 +318,9 @@ const handleSelect = (selectedValue) => {
           setAlertConfig((prev) => ({ ...prev, isOpen: false }));
         }
       },
+      onCancel: () => {
+        setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+      }
     });
   };
 
@@ -342,29 +345,32 @@ const handleSelect = (selectedValue) => {
           setAlertConfig((prev) => ({ ...prev, isOpen: false }));
         }
       },
+      onCancel: () => {
+        setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+      }
     });
   };
-  
+
   const decodeImageUrl = (url) => {
     try {
       return decodeURIComponent(url);
     } catch (error) {
       console.error("URL 디코딩 실패:", error);
-      return url; 
+      return url;
     }
   };
-  
+
   const decodedImageUrl = group?.imageUrl ? decodeImageUrl(group.imageUrl) : null;
 
-  
-  
+
+
   return (
     <div className="w-full max-w-full mx-auto py-3">
       <div className="flex flex-col md:flex-row p-6 relative">
-        <img 
+        <img
           className="w-[180px] h-[180px] rounded-lg object-cover"
-          src={group?.imageUrl ? `https://d1up383l0okfvw.cloudfront.net/${decodedImageUrl}` : defaultImage} 
-          alt="그룹 이미지" 
+          src={group?.imageUrl ? `https://d1up383l0okfvw.cloudfront.net/${decodedImageUrl}` : defaultImage}
+          alt="그룹 이미지"
         />
           {isAdmin && group?.imageUrl && (
             <button
@@ -398,23 +404,23 @@ const handleSelect = (selectedValue) => {
                   <span className="text-gray-500 text-sm">획득한 배지가 없습니다.</span>
                 )}
                 </div>
-                
+
               <div className="flex space-x-4 mt-3 md:mt-0">
               {isMember && !isAdmin ? (
-                <button 
+                <button
                   className="px-5 py-2 whitespace-nowrap w-[110px] text-white bg-normalGray hover:bg-normalGray-hover active:bg-normalGray-active rounded-lg"
                   onClick={handleLeaveGroup}
                 >
                   떠나기
                 </button>
               ) : !isMember ? (
-                <button 
+                <button
                   className="px-5 py-2 whitespace-nowrap w-[110px] text-white bg-black hover:bg-black-hover active:bg-black-active rounded-lg"
                   onClick={handleJoinGroup}
                 >
                   참여하기
                 </button>
-              ) : null} 
+              ) : null}
                   <AnimatePresence>
                   {floatingIcons.map((icon) => (
                     <motion.img
@@ -446,18 +452,18 @@ const handleSelect = (selectedValue) => {
 
       {isModalOpen && <CreateMemory onClose={() => setIsModalOpen(false)} />}
       {isMoreOpen && <MoreOptionsModal position={{ x: morePosition.x - 40, y: morePosition.y }} onClose={handleCloseMore} itemId={group.groupId} onEdit={() => setShowEditGroup(true)} onDelete={handleDeleteGroup}/>}
-      {showEditGroup && <EditGroup 
+      {showEditGroup && <EditGroup
         onUpdate={(updatedGroup) => {
           setGroup(updatedGroup);
           fetchGroupDetail();
-        }} 
-        onClose={() => setShowEditGroup(false)} 
+        }}
+        onClose={() => setShowEditGroup(false)}
       />}
 
       <div className="my-[70px] border-t border-gray-200"></div>
 
       <div>
-                
+
       <div className="flex gap-3 justify-start items-center mb-3">
           <h2 className="text-2xl font-semibold text-black">
             <span className="text-darkViolet">{group?.groupName || "그룹 이름"}</span>의 추억 목록
@@ -465,13 +471,13 @@ const handleSelect = (selectedValue) => {
           <button onClick={() => setIsModalOpen(true)}>
             <img src={AddIcon} alt="추억 추가" />
           </button>
-          
+
         </div>
 
       {/* 검색 바 & 새로고침 버튼 */}
       <div className="flex mt-4 items-center gap-5">
         <Select options={options} onSelect={handleSelect} value={sortBy} />
-      
+
         <SearchBar
           name="search"
           placeholder="게시글을 검색해 주세요."
