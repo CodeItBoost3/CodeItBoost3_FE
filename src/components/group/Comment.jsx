@@ -145,7 +145,7 @@ export default function CommentSection({ postId }) {
           setComments([]);
         }
       } catch {
-        addToast("댓글을 불러오는 중 오류가 발생했습니다.");
+        console.log("댓글을 불러오는 중 오류가 발생했습니다.");
       }
     };
   
@@ -174,7 +174,7 @@ export default function CommentSection({ postId }) {
   
       addToast("댓글이 수정되었습니다.");
     } catch {
-      addToast("댓글 수정 중 오류가 발생했습니다.");
+      console.log("댓글 수정 중 오류가 발생했습니다.");
     }
   };
   
@@ -188,7 +188,7 @@ export default function CommentSection({ postId }) {
       setNewComment("");
       addToast("댓글이 성공적으로 등록되었습니다.");
     } catch {
-      addToast("댓글 작성 중 오류가 발생했습니다.");
+      console.log("댓글 작성 중 오류가 발생했습니다.");
     }
   };
 
@@ -214,7 +214,7 @@ export default function CommentSection({ postId }) {
   
       addToast("답글이 성공적으로 등록되었습니다.");
     } catch {
-      addToast("답글 작성 중 오류가 발생했습니다.");
+      console.log("답글 작성 중 오류가 발생했습니다.");
     }
   };
   
@@ -241,7 +241,7 @@ export default function CommentSection({ postId }) {
   
       addToast("댓글이 삭제되었습니다.");
     } catch {
-      addToast("댓글 삭제 중 오류가 발생했습니다.");
+      console.log("댓글 삭제 중 오류가 발생했습니다.");
     } finally {
       setIsDeleteModalOpen(false);
       setSelectedCommentId(null);
@@ -267,7 +267,7 @@ export default function CommentSection({ postId }) {
         addToast("좋아요가 취소되었습니다. 💔");
       }
     } catch {
-      addToast("좋아요 요청 중 오류가 발생했습니다.");
+      console.log("좋아요 요청 중 오류가 발생했습니다.");
     }
   };
 
