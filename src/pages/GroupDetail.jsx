@@ -510,7 +510,7 @@ const handleSelect = (selectedValue) => {
             <PublicPostCard key={memory.id} groupId={groupId} {...memory} />
           ))
         ) : (
-          <p className="text-center w-full col-span-4">검색 결과가 없습니다.</p>
+          <p className="text-center w-full col-span-4">결과가 없습니다.</p>
         )}
 
         </div>
