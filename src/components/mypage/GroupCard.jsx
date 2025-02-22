@@ -15,7 +15,6 @@ export default function GroupCard() {
     const fetchGroups = async () => {
       try {
         const response = await userService.getMyGroups();
-        console.log(response);
         const groupList = response.data.groups.map((item) => ({
           id: item.group.groupId,
           name: item.group.groupName,
