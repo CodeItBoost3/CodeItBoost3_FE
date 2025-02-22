@@ -193,14 +193,16 @@ export default function Group() {
     if (!url) return null;
   
     try {
-      // UTF-8 디코딩 적용
+      // URL 디코딩
       const decodedUrl = decodeURIComponent(url);
   
-      // CDN이 포함되지 않은 경우 자동 추가
-      if (!decodedUrl.startsWith("https")) {
-        return `https://d1up383l0okfvw.cloudfront.net/${decodedUrl}`;
-      }
-      return decodedUrl;
+      // d~~로 시작하는지 확인 (예: d123abc)
+      const isPatternMatched = decodedUrl.match(/^d[\w-]+/);
+  
+      // 무조건 https://를 붙이고, d~~로 시작하는 게 없으면 CDN 도메인도 붙이기
+      return isPatternMatched
+        ? `https://${decodedUrl}`
+        : `https://d1up383l0okfvw.cloudfront.net/${decodedUrl}`;
     } catch {
       return `https://d1up383l0okfvw.cloudfront.net/${url}`;
     }
