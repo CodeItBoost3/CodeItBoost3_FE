@@ -352,13 +352,24 @@ const handleSelect = (selectedValue) => {
   };
 
   const decodeImageUrl = (url) => {
+    if (!url) return defaultImage;
+  
     try {
-      return decodeURIComponent(url);
-    } catch (error) {
-      console.error("URL 디코딩 실패:", error);
-      return url;
+      // URL 디코딩
+      const decodedUrl = decodeURIComponent(url);
+  
+      // d~~(예: d123abc)로 시작하는지 확인하는 정규식
+      const isPatternMatched = /^d[\w-]+/.test(decodedUrl);
+  
+      // 무조건 https:// 붙이고, d~~로 시작하지 않으면 CDN 도메인 추가
+      return isPatternMatched
+        ? `https://${decodedUrl}` // d~~로 시작하면 그냥 https://만 붙임
+        : `https://d1up383l0okfvw.cloudfront.net/${decodedUrl}`; // 아니면 CDN 추가
+    } catch {
+      return `https://d1up383l0okfvw.cloudfront.net/${url}`;
     }
   };
+  
 
   const decodedImageUrl = group?.imageUrl ? decodeImageUrl(group.imageUrl) : null;
 
@@ -369,7 +380,7 @@ const handleSelect = (selectedValue) => {
       <div className="flex flex-col md:flex-row p-6 relative">
         <img
           className="w-[180px] h-[180px] rounded-lg object-cover"
-          src={group?.imageUrl ? `https://d1up383l0okfvw.cloudfront.net/${decodedImageUrl}` : defaultImage}
+          src={group?.imageUrl ? decodedImageUrl : defaultImage}
           alt="그룹 이미지"
         />
           {isAdmin && group?.imageUrl && (
