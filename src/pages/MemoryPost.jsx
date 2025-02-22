@@ -172,9 +172,10 @@ useEffect(() => {
 
   const iconStyle = "size-7 cursor-pointer";
 
-  if (!post) {
-    return <div className="text-center text-darkGray">게시글이 존재하지 않습니다.</div>;
+  if (!post || Object.keys(post).length === 0) {
+    return <div className="text-center text-darkGray">게시글을 불러오는 중입니다...</div>;
   }
+  
 
   return (
     <div className="w-full max-w-[90%] mx-auto pt-6 pb-10">
