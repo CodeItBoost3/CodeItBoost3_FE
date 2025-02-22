@@ -34,14 +34,15 @@ function Comment({ postId, comment, onEdit, onDelete, onLike, onReply, myId }) {
     setIsReplying(false);
   };
   
+  const userProfileImage = comment.user?.profileImageUrl
+  ? `https://d1up383l0okfvw.cloudfront.net/${comment.user.profileImageUrl}` 
+  : userProfile;
   
-  
-
   return (
     <div className={`flex flex-col py-3 relative ${comment.parentId ? "ml-6 pl-4 before:absolute before:-left-4 before:top-1 before:w-4 before:h-4 before:border-l-2 before:border-b-2 before:border-gray-300" : ""}`}>
 
       <div className="flex items-start space-x-3">
-        <img src={comment.profile || userProfile} alt="프로필" className="w-8 h-8 rounded-full" />
+        <img src={userProfileImage || userProfile} alt="프로필" className="w-8 h-8 rounded-full" />
         <div className="flex-1">
           <span className="text-sm font-semibold">{comment.nickname}</span>
           {isEditing ? (
